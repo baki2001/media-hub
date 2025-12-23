@@ -1,0 +1,44 @@
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+}
+
+.statCard {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.iconArea {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.statInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.statValue {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.statLabel {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.statSub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}

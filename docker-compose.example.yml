@@ -1,0 +1,43 @@
+# MediaHub - Docker Compose Example
+# Add this service to your existing docker-compose.yml
+
+# Replace your existing 'dashboard' service with this:
+#
+#   mediahub:
+#     build: ./media-hub                          # Path to MediaHub source
+#     container_name: mediahub
+#     networks: [media]
+#     environment:
+#       - TZ=Europe/Amsterdam
+#     volumes:
+#       - /home/media-stack/config/mediahub:/data # SQLite DB persistence
+#     ports:
+#       - "80:3000"                               # WebUI (or use 3001:3000 if 80 is taken)
+#     restart: unless-stopped
+#     labels:
+#       - "com.centurylinklabs.watchtower.enable=true"
+
+# ============================================
+# Full standalone docker-compose for testing:
+# ============================================
+
+services:
+  mediahub:
+    build: .
+    container_name: mediahub
+    environment:
+      - TZ=Europe/Amsterdam
+      - NODE_ENV=production
+    volumes:
+      - mediahub_data:/data                       # SQLite DB persistence
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mediahub_data:

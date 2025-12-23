@@ -1,0 +1,13 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainContent {
+    flex: 1;
+    margin-left: 260px;
+    /* Matches Sidebar width */
+    padding: 32px 48px;
+    position: relative;
+    max-width: 1600px;
+}

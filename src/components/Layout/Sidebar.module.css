@@ -1,0 +1,277 @@
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    z-index: 50;
+    transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--space-4);
+    padding: 0 12px var(--space-4) 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.logoIcon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: black;
+    /* Always black for contrast on accent color */
+    font-size: 20px;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.logoText {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1;
+    overflow-y: auto;
+    padding-top: var(--space-2);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.nav::-webkit-scrollbar {
+    display: none;
+}
+
+.navGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.navGroup+.navGroup {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--glass-border);
+}
+
+.groupLabel {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0 var(--space-3);
+    margin-bottom: var(--space-2);
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.navItem:hover {
+    background: rgba(125, 125, 125, 0.1);
+    color: var(--text-primary);
+    transform: translateX(4px);
+}
+
+.active {
+    background: var(--accent-glow) !important;
+    color: var(--accent) !important;
+    border-color: rgba(20, 184, 166, 0.2);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.active .icon {
+    stroke-width: 2.5px;
+}
+
+.label {
+    font-size: 15px;
+}
+
+.sidebarFooter {
+    margin-top: auto;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    /* Ensure contrast against scroll */
+}
+
+/* Notification Trigger */
+.notifyContainer {
+    position: relative;
+}
+
+.notifyButton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    width: 100%;
+    border-radius: var(--radius-lg);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.notifyButton:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.notifyIconWrapper {
+    position: relative;
+}
+
+.notifyBadge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: var(--radius-full);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.notifyPanel {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: var(--space-4);
+    width: 320px;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-4);
+    z-index: 60;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notifyHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.notifyTitle {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.notifyClearBtn {
+    background: none;
+    border: none;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.notifyClearBtn:hover {
+    color: var(--text-primary);
+}
+
+.notifyList {
+    max-height: 240px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.notifyEmpty {
+    text-align: center;
+    padding: var(--space-4);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.notifyItem {
+    font-size: var(--font-size-sm);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 2px solid var(--accent);
+}
+
+.notifyItem.error {
+    border-left-color: var(--danger);
+}
+
+.notifyItemTitle {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.notifyItemMessage {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.notifyItemTime {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: right;
+    opacity: 0.6;
+}
