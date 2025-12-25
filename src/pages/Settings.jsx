@@ -9,7 +9,9 @@ import {
     Settings as SettingsIcon, Search, Subtitles, Inbox, ChevronLeft, Loader, CheckCircle, XCircle, BarChart, Trash, Plus, RefreshCw,
     Moon, Sun, Monitor, Upload, FileDown
 } from 'lucide-react'
+import { Button, Skeleton } from '../components/Common'
 import styles from './Settings.module.css'
+import { VERSION, BUILD_ID, CHANGELOG } from '../data/changelog'
 
 const TABS = [
     { id: 'connections', label: 'Connections', icon: Server },
@@ -246,9 +248,14 @@ const Settings = () => {
 
                         {editingService ? (
                             <div className={styles.formContainer}>
-                                <button className={styles.backBtn} onClick={() => { setEditingService(null); setTestStatus(null); }}>
-                                    <ChevronLeft size={16} /> Back
-                                </button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    icon={ChevronLeft}
+                                    onClick={() => { setEditingService(null); setTestStatus(null); }}
+                                >
+                                    Back
+                                </Button>
                                 <h3 className={styles.formTitle}>Configure {editingService}</h3>
 
                                 <div className={styles.formGroup}>
@@ -274,25 +281,24 @@ const Settings = () => {
                                 </div>
 
                                 <div className={styles.formActions}>
-                                    <button
-                                        className={styles.testBtn}
+                                    <Button
+                                        variant="ghost"
                                         onClick={handleTest}
+                                        loading={testStatus === 'testing'}
                                         disabled={testStatus === 'testing'}
+                                        icon={testStatus === 'success' ? CheckCircle : testStatus === 'error' ? XCircle : null}
                                     >
-                                        {testStatus === 'testing' && <Loader size={16} className={styles.spin} />}
-                                        {testStatus === 'success' && <CheckCircle size={16} />}
-                                        {testStatus === 'error' && <XCircle size={16} />}
                                         {!testStatus && 'Test Connection'}
                                         {testStatus === 'testing' && 'Testing...'}
                                         {testStatus === 'success' && 'Connected!'}
                                         {testStatus === 'error' && 'Failed'}
-                                    </button>
-                                    <button className={styles.saveBtn} onClick={handleSave}>
-                                        <Save size={16} /> Save
-                                    </button>
-                                    <button className={styles.cancelBtn} onClick={() => { setEditingService(null); setTestStatus(null); }}>
+                                    </Button>
+                                    <Button variant="primary" icon={Save} onClick={handleSave}>
+                                        Save
+                                    </Button>
+                                    <Button variant="ghost" onClick={() => { setEditingService(null); setTestStatus(null); }}>
                                         Cancel
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         ) : (
@@ -313,20 +319,21 @@ const Settings = () => {
                                             </div>
                                             <div className={styles.serviceActions}>
                                                 {isConfigured && service.hasRestart && (
-                                                    <button
-                                                        className={styles.restartBtn}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        icon={Power}
                                                         onClick={() => handleRestart(service.key)}
                                                         title="Restart"
-                                                    >
-                                                        <Power size={16} />
-                                                    </button>
+                                                    />
                                                 )}
-                                                <button
-                                                    className={styles.configureBtn}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
                                                     onClick={() => handleEdit(service.key)}
                                                 >
                                                     Configure
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     )
@@ -521,11 +528,11 @@ const Settings = () => {
                             <div className={styles.aboutGrid}>
                                 <div className={styles.aboutCard}>
                                     <span className={styles.aboutLabel}>Version</span>
-                                    <span className={styles.aboutValue}>v1.4.1</span>
+                                    <span className={styles.aboutValue}>v{VERSION}</span>
                                 </div>
                                 <div className={styles.aboutCard}>
-                                    <span className={styles.aboutLabel}>Build</span>
-                                    <span className={styles.aboutValue}>Production</span>
+                                    <span className={styles.aboutLabel}>Build ID</span>
+                                    <span className={styles.aboutValue} style={{ fontFamily: 'monospace', fontSize: 'var(--font-size-sm)' }}>{BUILD_ID}</span>
                                 </div>
                                 <div className={styles.aboutCard}>
                                     <span className={styles.aboutLabel}>Environment</span>

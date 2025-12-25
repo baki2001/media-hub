@@ -1,0 +1,109 @@
+.tabs {
+    display: flex;
+    gap: var(--space-1);
+}
+
+/* Pills variant (default) */
+.pills {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-1);
+}
+
+.pills .tab {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition: all var(--transition-fast);
+}
+
+.pills .tab:hover:not(.disabled) {
+    color: var(--text-primary);
+    background: var(--interactive-hover);
+}
+
+.pills .tab.active {
+    background: var(--accent);
+    color: black;
+}
+
+/* Underline variant */
+.underline {
+    border-bottom: 1px solid var(--glass-border);
+    gap: var(--space-4);
+}
+
+.underline .tab {
+    padding: var(--space-3) var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    position: relative;
+    transition: color var(--transition-fast);
+}
+
+.underline .tab::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background var(--transition-fast);
+}
+
+.underline .tab:hover:not(.disabled) {
+    color: var(--text-primary);
+}
+
+.underline .tab.active {
+    color: var(--accent);
+}
+
+.underline .tab.active::after {
+    background: var(--accent);
+}
+
+/* Tab states */
+.tab:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.tab.disabled {
+    opacity: var(--interactive-disabled-opacity);
+    cursor: not-allowed;
+}
+
+/* Badge */
+.badge {
+    background: var(--badge-default-bg);
+    color: var(--badge-default-text);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    min-width: 18px;
+    text-align: center;
+}
+
+.pills .tab.active .badge {
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
+}

@@ -4,6 +4,7 @@ import { useSettings } from '../context/SettingsContext'
 import { RadarrService, SonarrService } from '../services/media'
 import MediaCard from '../components/Cards/MediaCard'
 import MediaDetailsModal from '../components/Modals/MediaDetailsModal'
+import { Tabs, MediaCardSkeleton } from '../components/Common'
 import { Film, Tv, RefreshCw, AlertCircle, Search } from 'lucide-react'
 import styles from './Library.module.css'
 
@@ -71,24 +72,24 @@ const Library = () => {
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
                     <h1 className={styles.title}>My Library</h1>
-                    <div className={styles.tabs}>
-                        <button
-                            className={`${styles.tab} ${isMovies ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('movies')}
-                        >
-                            <Film size={16} />
-                            Movies
-                            {moviesQuery.data && <span className={styles.tabCount}>{moviesQuery.data.length}</span>}
-                        </button>
-                        <button
-                            className={`${styles.tab} ${!isMovies ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('tv')}
-                        >
-                            <Tv size={16} />
-                            TV Shows
-                            {seriesQuery.data && <span className={styles.tabCount}>{seriesQuery.data.length}</span>}
-                        </button>
-                    </div>
+                    <Tabs
+                        items={[
+                            {
+                                id: 'movies',
+                                label: 'Movies',
+                                icon: Film,
+                                badge: moviesQuery.data?.length
+                            },
+                            {
+                                id: 'tv',
+                                label: 'TV Shows',
+                                icon: Tv,
+                                badge: seriesQuery.data?.length
+                            }
+                        ]}
+                        activeId={activeTab}
+                        onChange={setActiveTab}
+                    />
                 </div>
 
                 <div className={styles.headerRight}>
@@ -125,9 +126,10 @@ const Library = () => {
             </header>
 
             {currentQuery.isLoading && (
-                <div className={styles.loading}>
-                    <RefreshCw className={styles.spin} size={24} />
-                    Loading {isMovies ? 'movies' : 'TV shows'}...
+                <div className={styles.grid}>
+                    {Array.from({ length: 12 }).map((_, i) => (
+                        <MediaCardSkeleton key={i} />
+                    ))}
                 </div>
             )}
 
