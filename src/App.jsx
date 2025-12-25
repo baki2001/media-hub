@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Library from './pages/Library'
 import Search from './pages/Search'
 import Downloads from './pages/Downloads'
-import Activity from './pages/Activity'
+import Calendar from './pages/Calendar'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Jobs from './pages/Jobs'
@@ -51,7 +51,7 @@ function App() {
               <Route path="/downloads" element={<Downloads />} />
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/stats" element={<Stats />} />
-              <Route path="/activity" element={<Activity />} />
+              <Route path="/calendar" element={<Calendar />} />
               <Route path="/indexers" element={<Indexers />} />
               <Route path="/subtitles" element={<SubtitlesPage />} />
               <Route path="/fileflows" element={<FileFlows />} />

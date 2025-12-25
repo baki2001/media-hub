@@ -1,90 +1,148 @@
-.searchInput {
+.layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+    height: 100%;
+}
+
+.sidebar {
+    background: var(--glass-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.sidebarTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: var(--accent);
+}
+
+.filterGroup {
+    margin-bottom: 1.5rem;
+}
+
+.filterGroup label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.filterSelect {
     width: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 16px 16px 16px 50px;
-    font-size: 18px;
-    color: white;
+    padding: 0.75rem;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
     outline: none;
-    transition: all 0.2s;
+}
+
+.mainContent {
+    padding-right: 2rem;
+    padding-bottom: 2rem;
+    overflow-y: auto;
+}
+
+.header {
+    margin-bottom: 2rem;
 }
 
 .searchWrapper {
     position: relative;
-    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.searchInput:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.1);
-}
 
 .searchIcon {
     position: absolute;
-    left: 16px;
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
-    pointer-events: none;
 }
 
-.typeToggle {
-    position: absolute;
-    right: 12px;
-    top: 10px;
-    display: flex;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 4px;
-}
-
-.typeBtn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
+.searchInput {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 99px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
     transition: all 0.2s;
+    outline: none;
 }
 
-.activeType {
-    background: var(--glass-highlight);
-    color: white;
-    font-weight: 600;
+.searchInput:focus {
+    background: var(--glass-hover);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.loadingState,
+.emptyState {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .resultsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 20px;
+    /* Increased width for grid items to make posters larger */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
 }
 
+/* Card Styles */
 .resultCard {
-    display: flex;
-    flex-direction: column;
+    background: var(--glass-bg);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.resultCard:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-color);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .posterWrapper {
     position: relative;
+    /* Aspect ratio remains the same, but larger grid column makes it bigger */
     aspect-ratio: 2/3;
-    border-radius: 12px;
     overflow: hidden;
-    background: #111;
+    background: #1a1a1a;
 }
+
 
 .poster {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.resultCard:hover .poster {
+    transform: scale(1.05);
 }
 
 .overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,81 +155,153 @@
 }
 
 .addBtn {
-    background: var(--accent);
-    color: black;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-weight: 600;
     cursor: pointer;
-    transform: scale(0.9);
+    transform: translateY(10px);
     transition: all 0.2s;
 }
 
+.resultCard:hover .addBtn {
+    transform: translateY(0);
+}
+
 .addBtn:hover {
-    transform: scale(1);
-    background: white;
-}
-
-.addedBadge {
-    color: var(--success);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.header {
-    margin-bottom: var(--space-8);
-}
-
-.loadingState,
-.emptyState {
-    text-align: center;
-    padding: var(--space-12) var(--space-4);
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
+    filter: brightness(1.1);
 }
 
 .cardInfo {
-    margin-top: var(--space-2);
+    padding: 1rem;
 }
 
 .cardTitle {
-    font-weight: 700;
-    font-size: var(--font-size-sm);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--text-primary);
 }
 
 .cardMeta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
-    margin-top: var(--space-1);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.inLibraryBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
 .typeBadge {
+    padding: 0.15rem 0.5rem;
+    background: var(--glass-hover);
+    border-radius: 4px;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    font-size: 10px;
-    border: 1px solid var(--glass-border);
-    padding: 1px 6px;
-    border-radius: var(--radius-sm);
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-.fallback {
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    font-size: var(--font-size-xs);
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+.modalHeader {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.modalContent {
+    padding: 1.5rem;
+}
+
+.modalFooter {
+    padding: 1.5rem;
+    background: var(--glass-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.select {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.select:focus {
+    border-color: var(--accent);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

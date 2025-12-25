@@ -16,81 +16,77 @@ This workflow documents how to deploy changes from the local media-hub project t
 
 ## Steps to Deploy
 
-### 1. Copy Changed Files to Production Server
+### 1. Synchronize Source Code
 
-From the local project directory (`c:\Users\BakiColakoglu\.gemini\antigravity\scratch\media-hub`), use SCP to copy files:
+Instead of copying individual files, it is safer to synchronize the entire `src` directory to ensure no new files (like contexts, components, or services) are missed.
 
-```powershell
-# Example: Copy specific changed files
-scp -o StrictHostKeyChecking=no <local-file-path> root@192.168.178.23:/home/media-stack/media-hub/<remote-path>
-
-# Common file paths:
-# - Backend files: server/routes/*.js, server/*.js
-# - Frontend services: src/services/*.js
-# - Frontend pages: src/pages/*.jsx
-# - Frontend components: src/components/*.jsx
-# - Styles: src/pages/*.module.css, src/components/*.css
-```
-
-### 2. SSH into Production Server
+From the local project directory (`c:\Users\BakiColakoglu\.gemini\antigravity\scratch\media-hub`):
 
 ```powershell
-ssh root@192.168.178.23
-# Password: BCy1317!
+# Sync the entire src folder recursively
+scp -r -o StrictHostKeyChecking=no src root@192.168.178.23:/home/media-stack/media-hub/
+
+# If you modified backend files, sync server folder as well
+# scp -r -o StrictHostKeyChecking=no server root@192.168.178.23:/home/media-stack/media-hub/
 ```
 
-### 3. Build the Frontend and Rebuild the Container
+### 2. Prepare Deployment Script
 
-**IMPORTANT**: 
-- The Docker build uses a pre-built `dist` folder, so you must run `npm run build` before rebuilding the container
-- Only touch the media-hub container, do NOT restart or rebuild other containers!
+The build process is complex and can fail if environment variables (like NVM) are missing. We use a server-side script to handle the build reliably.
+
+**Create `deploy.sh` in your local project root if it doesn't exist:**
 
 ```bash
+#!/bin/bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+echo "Starting Deployment..." > /root/deploy_log.txt
+
 cd /home/media-stack/media-hub
+echo "Building Frontend..." >> /root/deploy_log.txt
+npm install >> /root/deploy_log.txt 2>&1
+npm run build >> /root/deploy_log.txt 2>&1
 
-# Build the frontend (compiles src/ into dist/)
-npm run build
+if [ $? -eq 0 ]; then
+    echo "Frontend Build Success" >> /root/deploy_log.txt
+    cd /home/media-stack
+    echo "Rebuiding Container..." >> /root/deploy_log.txt
+    docker compose up -d --build mediahub >> /root/deploy_log.txt 2>&1
+    echo "Deployment Complete" >> /root/deploy_log.txt
+else
+    echo "Frontend Build Failed" >> /root/deploy_log.txt
+fi
+```
 
-# Go back to docker-compose directory and rebuild
-cd /home/media-stack
+**Upload the script to the server:**
 
-# Rebuild and restart only the mediahub service
+```powershell
+scp -o StrictHostKeyChecking=no deploy.sh root@192.168.178.23:/root/deploy.sh
+```
+
+### 3. Execute Deployment
+
+Run the script on the server via SSH. The script will:
+1.  Source NVM environment.
+2.  Install new dependencies (`npm install`).
+3.  Build the frontend (`npm run build`).
+4.  Rebuild and restart the Docker container.
+5.  Log output to `/root/deploy_log.txt`.
+
+```powershell
 // turbo
-docker compose up -d --build mediahub
+ssh root@192.168.178.23 "bash /root/deploy.sh"
 ```
 
 ### 4. Verify Deployment
 
-- Access the application at http://192.168.178.23:81/
-- Check logs if needed: `docker compose logs -f mediahub`
-
-## Quick One-Liner Deploy (from local machine)
+Check the status by reading the logs:
 
 ```powershell
-# Copy all changed files, build frontend, and rebuild container
-scp -o StrictHostKeyChecking=no server/routes/proxy.js src/services/api.js src/services/jellystat.js src/pages/Stats.jsx root@192.168.178.23:/home/media-stack/media-hub/ && ssh root@192.168.178.23 "cd /home/media-stack/media-hub && npm run build && cd /home/media-stack && docker compose up -d --build mediahub"
+ssh root@192.168.178.23 "tail -n 10 /root/deploy_log.txt"
 ```
 
-## File Structure on Production
-
-```
-/home/media-stack/
-├── media-hub/               # Main project directory (source code)
-│   ├── server/              # Backend code
-│   │   ├── routes/
-│   │   │   ├── proxy.js
-│   │   │   ├── settings.js
-│   │   │   └── auth.js
-│   │   ├── index.js
-│   │   └── database.js
-│   ├── src/                 # Frontend code
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── components/
-│   │   └── context/
-│   ├── package.json
-│   └── Dockerfile
-├── config/
-│   └── mediahub/           # Persistent config/data
-└── docker-compose.yml
-```
+Look for **"Deployment Complete"**.
+- If it failed, check the full log: `ssh root@192.168.178.23 "cat /root/deploy_log.txt"`
+- Access the application at: http://media.broikiservices.com (or http://192.168.178.23:81/)

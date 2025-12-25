@@ -39,24 +39,47 @@ export const SettingsProvider = ({ children }) => {
     const [settings, setSettings] = useState(DEFAULT_SETTINGS)
     const [loading, setLoading] = useState(true)
 
-    // Load settings from backend or localStorage
+    // Keys that should be stored locally per-browser/user
+    const LOCAL_KEYS = ['appearance', 'navVisibility', 'jellyfinServers']
+
+    // Load settings from backend and localStorage
     useEffect(() => {
         const loadSettings = async () => {
             try {
-                if (isDev) {
-                    // In development, use localStorage
-                    const saved = localStorage.getItem('media-hub-settings')
-                    if (saved) {
-                        setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(saved) })
-                    }
-                } else {
-                    // In production, fetch from backend
-                    const response = await fetch('/api/settings')
-                    if (response.ok) {
-                        const data = await response.json()
-                        setSettings({ ...DEFAULT_SETTINGS, ...data })
+                let mergedSettings = { ...DEFAULT_SETTINGS }
+
+                // 1. Load Server-side Settings (Global) - Production only
+                if (!isDev) {
+                    try {
+                        const response = await fetch('/api/settings')
+                        if (response.ok) {
+                            const serverData = await response.json()
+                            mergedSettings = { ...mergedSettings, ...serverData }
+                        }
+                    } catch (e) {
+                        console.error('Failed to load server settings', e)
                     }
                 }
+
+                // 2. Load Client-side Settings (Local) - Overrides global for specific keys
+                const localData = localStorage.getItem('media-hub-client-settings')
+                if (localData) {
+                    const parsed = JSON.parse(localData)
+                    // Only merge allowed local keys
+                    LOCAL_KEYS.forEach(key => {
+                        if (parsed[key]) mergedSettings[key] = parsed[key]
+                    })
+                }
+
+                // Development specific: Load everything from local if dev
+                if (isDev) {
+                    const devSaved = localStorage.getItem('media-hub-settings')
+                    if (devSaved) {
+                        mergedSettings = { ...mergedSettings, ...JSON.parse(devSaved) }
+                    }
+                }
+
+                setSettings(mergedSettings)
             } catch (error) {
                 console.error('Failed to load settings:', error)
             } finally {
@@ -66,59 +89,75 @@ export const SettingsProvider = ({ children }) => {
         loadSettings()
     }, [])
 
-    // Apply theme mode to document
+    // Theme Application Effect
     useEffect(() => {
-        const applyTheme = (mode) => {
-            if (mode === 'system') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
+        const appearance = settings.appearance || {}
+        const mode = appearance.themeMode || 'dark'
+        const color = appearance.accentColor || '#0d9488'
+
+        // Apply Mode
+        const root = document.documentElement
+        if (mode === 'system') {
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+            root.setAttribute('data-theme', systemDark ? 'dark' : 'light')
+        } else {
+            root.setAttribute('data-theme', mode)
+        }
+
+        // Apply Color
+        root.style.setProperty('--accent', color)
+        // Simple variations for hover/glow (could be more sophisticated)
+        // Note: Hex to RGBA conversion would be better here for --accent-glow
+        // For now, we rely on the implementation in index.css or simple opacity overrides if CSS var is hex
+    }, [settings.appearance])
+
+    // Save logic
+    const saveSettings = async (newSettings) => {
+        try {
+            // Split settings into Local and Server
+            const localSettings = {}
+            const serverSettings = {}
+
+            Object.keys(newSettings).forEach(key => {
+                if (LOCAL_KEYS.includes(key)) {
+                    localSettings[key] = newSettings[key]
+                } else {
+                    serverSettings[key] = newSettings[key]
+                }
+            })
+
+            // Save Local
+            localStorage.setItem('media-hub-client-settings', JSON.stringify(localSettings))
+
+            // Save Server (if not dev and requests are for server keys)
+            // Note: We don't save to backend if only local keys changed, unless we strongly want to sync.
+            // But here we want separation.
+
+            if (isDev) {
+                localStorage.setItem('media-hub-settings', JSON.stringify(newSettings))
             } else {
-                document.documentElement.setAttribute('data-theme', mode)
+                // Determine if we need to push to server
+                // This is a bit naive, ideally we check diff. 
+                // But for now, if 'updateService' was called on a non-local key, we should save.
+                // Since this effect runs on *any* change, we might simply save serverSettings to backend.
+                // Optimization: We can't easily know WHICH key changed in this effect without previous state comparison.
+                // However, sending the whole serverSettings object is fine.
+
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serverSettings)
+                })
             }
+        } catch (error) {
+            console.error('Failed to save settings:', error)
         }
-
-        const themeMode = settings.appearance?.themeMode || 'dark'
-        applyTheme(themeMode)
-
-        // Listen for system preference changes when in 'system' mode
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        const handleChange = () => {
-            if (settings.appearance?.themeMode === 'system') {
-                applyTheme('system')
-            }
-        }
-        mediaQuery.addEventListener('change', handleChange)
-        return () => mediaQuery.removeEventListener('change', handleChange)
-    }, [settings.appearance?.themeMode])
-
-    // Apply accent color
-    useEffect(() => {
-        const color = settings.appearance?.accentColor || '#0d9488'
-        document.documentElement.style.setProperty('--accent', color)
-        // Generate glow and hover variants
-        document.documentElement.style.setProperty('--accent-glow', `${color}33`)
-    }, [settings.appearance?.accentColor])
+    }
 
     // Save settings when they change
     useEffect(() => {
-        if (loading) return // Don't save during initial load
-
-        const saveSettings = async () => {
-            try {
-                if (isDev) {
-                    localStorage.setItem('media-hub-settings', JSON.stringify(settings))
-                } else {
-                    await fetch('/api/settings', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(settings)
-                    })
-                }
-            } catch (error) {
-                console.error('Failed to save settings:', error)
-            }
-        }
-        saveSettings()
+        if (loading) return
+        saveSettings(settings)
     }, [settings, loading])
 
     const updateService = (service, key, value) => {

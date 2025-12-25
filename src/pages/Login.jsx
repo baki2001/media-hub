@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { Server, User, Key, ArrowRight, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react'
+import { PosterWall } from '../components/Common/PosterWall'
 import styles from './Login.module.css'
 
 const Login = () => {
@@ -12,8 +13,21 @@ const Login = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        const saved = localStorage.getItem('mediahub_remember')
+        if (saved) {
+            try {
+                const { url, user } = JSON.parse(saved)
+                if (url) setServerUrl(url)
+                if (user) setUsername(user)
+                if (url && user) setRememberMe(true)
+            } catch (e) { /* ignore */ }
+        }
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -24,6 +38,12 @@ const Login = () => {
             setError('Server URL and Username are required')
             setLoading(false)
             return
+        }
+
+        if (rememberMe) {
+            localStorage.setItem('mediahub_remember', JSON.stringify({ url: serverUrl, user: username }))
+        } else {
+            localStorage.removeItem('mediahub_remember')
         }
 
         const result = await login(serverUrl, username, password)
@@ -38,12 +58,8 @@ const Login = () => {
 
     return (
         <div className={styles.container}>
-            {/* Animated Background */}
-            <div className={styles.backgroundOrbs}>
-                <div className={styles.orb1} />
-                <div className={styles.orb2} />
-                <div className={styles.orb3} />
-            </div>
+            {/* Dynamic Background */}
+            <PosterWall />
 
             {/* Login Card */}
             <div className={styles.card}>
@@ -118,6 +134,18 @@ const Login = () => {
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+                    </div>
+
+                    <div className={styles.optionsRow}>
+                        <label className={styles.checkboxLabel}>
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={e => setRememberMe(e.target.checked)}
+                                className={styles.checkbox}
+                            />
+                            <span>Remember Me</span>
+                        </label>
                     </div>
 
                     <button type="submit" className={styles.submitBtn} disabled={loading}>

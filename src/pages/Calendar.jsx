@@ -4,11 +4,11 @@ import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, addMont
 import { ChevronLeft, ChevronRight, Calendar as CalIcon, X } from 'lucide-react'
 import { useSettings } from '../context/SettingsContext'
 import { RadarrService, SonarrService } from '../services/media'
-import styles from './Activity.module.css'
+import styles from './Calendar.module.css'
 
 const MAX_VISIBLE_EVENTS = 3
 
-const Activity = () => {
+const Calendar = () => {
     const { settings } = useSettings()
     const [currentDate, setCurrentDate] = useState(new Date())
     const [expandedDay, setExpandedDay] = useState(null)
@@ -55,7 +55,7 @@ const Activity = () => {
             <header className={styles.header}>
                 <h1 className={styles.title}>
                     <CalIcon className={styles.titleIcon} />
-                    Activity Calendar
+                    Calendar
                 </h1>
 
                 <div className={styles.nav}>
@@ -137,4 +137,4 @@ const Activity = () => {
     )
 }
 
-export default Activity
+export default Calendar

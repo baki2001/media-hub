@@ -12,8 +12,9 @@
 }
 
 .modal {
-    background: #0a0a0a;
-    border: 1px solid var(--glass-border);
+    background: var(--bg-color);
+    /* Ensure high contrast in light mode via shadow or border if needed, but var(--glass-border) handles border */
+    box-shadow: var(--shadow-lg);
     width: 100%;
     max-width: 1000px;
     max-height: 90vh;

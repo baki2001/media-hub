@@ -74,20 +74,21 @@ export const AuthProvider = ({ children }) => {
             if (isDev) {
                 // Development mode: Direct Jellyfin response
                 // Response has: { User: { Id, Name, Policy: { IsAdministrator } }, AccessToken }
-                if (!authData.User?.Policy?.IsAdministrator) {
-                    throw new Error('Access Denied: Only Jellyfin Administrators can log in.')
-                }
+
+                const isAdmin = authData.User?.Policy?.IsAdministrator || false
+                // Removed strict admin check to allow normal users
 
                 userData = {
                     id: authData.User.Id,
                     name: authData.User.Name,
                     token: authData.AccessToken,
                     serverUrl: serverUrl.replace(/\/$/, ''),
-                    serverIsAdmin: true
+                    serverIsAdmin: isAdmin,
+                    isAdmin: isAdmin
                 }
             } else {
                 // Production mode: Backend auth response
-                // Response has: { success: true, user: { id, name, serverId } }
+                // Response has: { success: true, user: { id, name, serverId, isAdmin } }
                 if (!authData.success) {
                     throw new Error(authData.error || 'Authentication failed')
                 }
@@ -97,7 +98,8 @@ export const AuthProvider = ({ children }) => {
                     name: authData.user.name,
                     token: 'backend-managed', // Token is stored in backend
                     serverUrl: serverUrl.replace(/\/$/, ''),
-                    serverIsAdmin: true
+                    serverIsAdmin: authData.user.isAdmin, // This might be false now if not admin
+                    isAdmin: authData.user.isAdmin
                 }
             }
 
@@ -114,10 +116,10 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('mediahub_auth')
         setUser(null)
         setIsAuthenticated(false)
-        
+
         // In production, also call backend logout
         if (!isDev) {
-            fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+            fetch('/api/auth/logout', { method: 'POST' }).catch(() => { })
         }
     }
 

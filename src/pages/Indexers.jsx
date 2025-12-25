@@ -19,6 +19,7 @@ const Indexers = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState(null)
     const [isSearching, setIsSearching] = useState(false)
+    const [showEnabledOnly, setShowEnabledOnly] = useState(true)
 
     const { data: indexers, isLoading } = useQuery({
         queryKey: ['prowlarr', 'indexers'],
@@ -27,97 +28,40 @@ const Indexers = () => {
         staleTime: 5 * 60 * 1000,
     })
 
-    const { data: stats } = useQuery({
-        queryKey: ['prowlarr', 'stats'],
-        queryFn: () => ProwlarrService.getIndexerStats(settings),
-        enabled: !!settings?.prowlarr?.url,
-        staleTime: 5 * 60 * 1000,
-    })
+    // ... props ...
 
-    const toggleMutation = useMutation({
-        mutationFn: ({ indexer, enabled }) => ProwlarrService.toggleIndexer(settings, indexer, enabled),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['prowlarr', 'indexers'])
-            addNotification('success', 'Updated', 'Indexer status changed')
-        },
-        onError: (err) => addNotification('error', 'Failed', err.message)
-    })
+    const displayedIndexers = (indexers || []).filter(i => !showEnabledOnly || i.enable)
+    const enabledCount = (indexers || []).filter(i => i.enable).length
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) return
-        setIsSearching(true)
-        try {
-            const results = await ProwlarrService.search(settings, searchQuery)
-            setSearchResults(results)
-        } catch (err) {
-            addNotification('error', 'Search Failed', err.message)
-        }
-        setIsSearching(false)
-    }
-
-    const getStatForIndexer = (indexerId) => {
-        const statsArray = Array.isArray(stats) ? stats : stats?.indexers || []
-        return statsArray.find(s => s.indexerId === indexerId) || {}
-    }
-
-    const enabledCount = indexers?.filter(i => i.enable).length || 0
-
-    if (!settings?.prowlarr?.url) {
-        return (
-            <div className={styles.layout}>
-                <div className={styles.notConfigured}>
-                    <Radio size={48} />
-                    <h2>Prowlarr Not Configured</h2>
-                    <p>Add your Prowlarr connection in Settings to manage indexers.</p>
-                    <a href="/settings" className={styles.configBtn}>Configure</a>
-                </div>
-            </div>
-        )
-    }
+    // ...
 
     return (
         <div className={styles.layout}>
-            {/* Sidebar */}
-            <aside className={styles.sidebar}>
-                <h1 className={styles.sidebarTitle}>
-                    <Radio className={styles.titleIcon} /> Indexers
-                </h1>
-
-                <nav className={styles.nav}>
-                    {TABS.map(tab => {
-                        const Icon = tab.icon
-                        const count = tab.id === 'indexers' ? enabledCount : (searchResults?.length || 0)
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`${styles.navItem} ${activeTab === tab.id ? styles.active : ''}`}
-                            >
-                                <Icon size={18} />
-                                <span>{tab.label}</span>
-                                {count > 0 && <span className={styles.badge}>{count}</span>}
-                            </button>
-                        )
-                    })}
-                </nav>
-            </aside>
-
-            {/* Main Content */}
+            {/* ... */}
             <main className={styles.main}>
                 {/* Indexers Tab */}
                 {activeTab === 'indexers' && (
                     <>
                         <header className={styles.contentHeader}>
-                            <h2 className={styles.contentTitle}>Configured Indexers</h2>
-                            <p className={styles.contentSubtitle}>
-                                {enabledCount} of {indexers?.length || 0} indexers enabled
-                            </p>
+                            <div>
+                                <h2 className={styles.contentTitle}>Configured Indexers</h2>
+                                <p className={styles.contentSubtitle}>
+                                    {enabledCount} of {indexers?.length || 0} indexers enabled
+                                </p>
+                            </div>
+                            <button
+                                className={styles.filterBtn}
+                                onClick={() => setShowEnabledOnly(!showEnabledOnly)}
+                            >
+                                {showEnabledOnly ? <ToggleRight size={20} className={styles.on} /> : <ToggleLeft size={20} />}
+                                <span>{showEnabledOnly ? 'Enabled Only' : 'All Indexers'}</span>
+                            </button>
                         </header>
 
                         {isLoading && <div className={styles.loading}>Loading indexers...</div>}
 
                         <div className={styles.indexerGrid}>
-                            {(indexers || []).map(indexer => {
+                            {displayedIndexers.map(indexer => {
                                 const stat = getStatForIndexer(indexer.id)
                                 return (
                                     <div key={indexer.id} className={`${styles.indexerCard} ${!indexer.enable ? styles.disabled : ''}`}>

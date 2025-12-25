@@ -30,8 +30,8 @@ export const BazarrService = {
 
     // Search for episode subtitles
     searchEpisodeSubtitles: (settings, sonarrEpisodeId, sonarrSeriesId) =>
-        fetchFromService(settings, 'bazarr', `/api/episodes/${sonarrSeriesId}/${sonarrEpisodeId}/subtitles`, {
-            method: 'POST',
+        fetchFromService(settings, 'bazarr', `/api/episodes/${sonarrEpisodeId}/subtitles`, {
+            method: 'PATCH',
             body: JSON.stringify({})
         }),
 

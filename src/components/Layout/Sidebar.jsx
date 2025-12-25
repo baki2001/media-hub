@@ -1,13 +1,15 @@
 
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Library, Search, Download, Activity, Settings, Zap, BarChart, FileEdit, Archive, FolderInput, Bell, Radio, Subtitles, Cog } from 'lucide-react'
+import { Library, Search, Download, Settings, Zap, BarChart, FileEdit, Archive, FolderInput, Bell, Radio, Subtitles, Cog, Calendar, LogOut } from 'lucide-react'
 import { useNotification } from '../../context/NotificationContext'
 import { useSettings } from '../../context/SettingsContext'
+import { useAuth } from '../../context/AuthContext'
 import styles from './Sidebar.module.css'
 
 const Sidebar = () => {
     const { settings } = useSettings()
+    const { logout } = useAuth()
     const navVisibility = settings.navVisibility || {}
 
     // Grouped logically: Browse / Media / Management / System
@@ -17,7 +19,7 @@ const Sidebar = () => {
             items: [
                 { label: 'Library', icon: Library, path: '/library', key: 'library' },
                 { label: 'Search', icon: Search, path: '/search', key: 'search' },
-                { label: 'Activity', icon: Activity, path: '/activity', key: 'activity' },
+                { label: 'Calendar', icon: Calendar, path: '/calendar', key: 'calendar' },
             ]
         },
         {
@@ -80,6 +82,17 @@ const Sidebar = () => {
 
             <div className={styles.sidebarFooter}>
                 <NotificationTrigger />
+                <button
+                    onClick={logout}
+                    className={styles.notifyButton}
+                    style={{ marginTop: '8px' }}
+                    title="Logout"
+                >
+                    <div className={styles.notifyIconWrapper}>
+                        <LogOut size={20} />
+                    </div>
+                    <span>Logout</span>
+                </button>
             </div>
         </aside>
     )

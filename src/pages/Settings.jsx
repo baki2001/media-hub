@@ -67,7 +67,24 @@ const Settings = () => {
     const { settings, updateSettings, setMultipleSettings, addJellyfinServer, removeJellyfinServer, setActiveJellyfinServer } = useSettings()
     const { user, logout } = useAuth()
     const { addNotification } = useNotification()
-    const [activeTab, setActiveTab] = useState('connections')
+    const [activeTab, setActiveTab] = useState('appearance')
+
+    // Derived State
+    const isAdmin = user?.isAdmin
+
+    // Filter Tabs
+    const visibleTabs = TABS.filter(tab => {
+        if (tab.id === 'connections' && !isAdmin) return false
+        return true
+    })
+
+    // Ensure active tab is valid
+    React.useEffect(() => {
+        if (!visibleTabs.find(t => t.id === activeTab)) {
+            setActiveTab(visibleTabs[0]?.id || 'about')
+        }
+    }, [visibleTabs, activeTab])
+
     const [editingService, setEditingService] = useState(null)
     const [tempUrl, setTempUrl] = useState('')
     const [tempKey, setTempKey] = useState('')
@@ -199,7 +216,7 @@ const Settings = () => {
                 </h1>
 
                 <nav className={styles.nav}>
-                    {TABS.map(tab => {
+                    {visibleTabs.map(tab => {
                         const Icon = tab.icon
                         return (
                             <button
@@ -579,6 +596,27 @@ const Settings = () => {
                                 <li>Job queue monitoring</li>
                                 <li>Customizable themes</li>
                             </ul>
+                        </section>
+
+                        {/* Changelog */}
+                        <section className={styles.section}>
+                            <h3 className={styles.sectionTitle}>Changelog</h3>
+                            <div className={styles.changelog}>
+                                {CHANGELOG.slice(0, 3).map((log, idx) => (
+                                    <div key={idx} className={styles.changelogItem}>
+                                        <div className={styles.changelogHeader}>
+                                            <span className={styles.changelogVersion}>v{log.version}</span>
+                                            <span className={styles.changelogDate}>{log.date}</span>
+                                        </div>
+                                        <div className={styles.changelogTitle}>{log.title}</div>
+                                        <ul className={styles.changelogList}>
+                                            {log.changes.map((change, cIdx) => (
+                                                <li key={cIdx}>{change}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
                         </section>
 
                         {/* Credits */}

@@ -9,6 +9,7 @@ import { existsSync } from 'fs'
 import settingsRouter from './routes/settings.js'
 import proxyRouter from './routes/proxy.js'
 import authRouter from './routes/auth.js'
+import publicRouter from './routes/public.js'
 import { cleanupExpiredCache } from './database.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -41,6 +42,7 @@ const authLimiter = rateLimit({
 app.use('/api/settings', settingsRouter)
 app.use('/api/proxy', proxyRouter)
 app.use('/api/auth', authLimiter, authRouter)
+app.use('/api/public', publicRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {

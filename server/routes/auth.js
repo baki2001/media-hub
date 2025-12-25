@@ -57,22 +57,26 @@ router.post('/login', async (req, res) => {
         const authData = await authResponse.json()
 
         // Save Jellyfin config to database
-        setSetting('jellyfin', {
-            url: cleanUrl,
-            apiKey: authData.AccessToken,
-            token: authData.AccessToken,
-            userId: authData.User.Id,
-            userName: authData.User.Name,
-            serverId: authData.ServerId
-        })
+        // Only update server config if user is admin
+        if (authData.User.Policy.IsAdministrator) {
+            setSetting('jellyfin', {
+                url: cleanUrl,
+                apiKey: authData.AccessToken,
+                token: authData.AccessToken,
+                userId: authData.User.Id,
+                userName: authData.User.Name,
+                serverId: authData.ServerId
+            })
+        }
 
-        // Return user info (without sensitive data)
+        // Return user info
         res.json({
             success: true,
             user: {
                 id: authData.User.Id,
                 name: authData.User.Name,
-                serverId: authData.ServerId
+                serverId: authData.ServerId,
+                isAdmin: authData.User.Policy.IsAdministrator
             }
         })
 

@@ -73,8 +73,10 @@
 /* ====== LIGHT THEME ====== */
 [data-theme="light"] {
   /* Background */
-  --bg-color: #f8fafc;
-  --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  /* Background - Neutral/Warm Greys */
+  --bg-color: #f9fafb;
+  /* gray-50 */
+  --bg-gradient: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
 
   /* Glass Effects */
   --glass-bg: rgba(255, 255, 255, 0.85);
@@ -82,9 +84,13 @@
   --glass-highlight: rgba(0, 0, 0, 0.02);
 
   /* Text Colors */
-  --text-primary: #020617;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  /* Text Colors - Neutral Greys for better readability */
+  --text-primary: #111827;
+  /* gray-900 */
+  --text-secondary: #374151;
+  /* gray-700 */
+  --text-muted: #6b7280;
+  /* gray-500 */
 
   /* Shadows - softer for light mode */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);

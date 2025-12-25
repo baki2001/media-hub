@@ -1,9 +1,10 @@
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettings } from '../context/SettingsContext'
-import { RadarrService, SonarrService } from '../services/media'
+import { useAuth } from '../context/AuthContext'
+import { RadarrService, SonarrService, JellyseerrService } from '../services/media'
 import { SabnzbdService } from '../services/sabnzbd'
-import { Film, Tv, DownloadCloud, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Film, Tv, DownloadCloud, AlertTriangle, CheckCircle, MessageSquare, AlertCircle } from 'lucide-react'
 import styles from './Dashboard.module.css'
 
 const StatCard = ({ label, value, icon: Icon, color, subtext }) => (
@@ -21,15 +22,17 @@ const StatCard = ({ label, value, icon: Icon, color, subtext }) => (
 
 const Dashboard = () => {
     const { settings } = useSettings()
+    const { user } = useAuth()
+    const isAdmin = user?.isAdmin
 
-    // Queries
+    // Admin Queries
     const movies = useQuery({
         queryKey: ['radarr', 'count'],
         queryFn: async () => {
             const data = await RadarrService.getMovies(settings)
             return { total: data.length, missing: data.filter(m => !m.hasFile).length }
         },
-        enabled: !!settings?.radarr?.url
+        enabled: !!isAdmin && !!settings?.radarr?.url
     })
 
     const series = useQuery({
@@ -38,18 +41,103 @@ const Dashboard = () => {
             const data = await SonarrService.getSeries(settings)
             return { total: data.length, continuing: data.filter(s => s.status === 'continuing').length }
         },
-        enabled: !!settings?.sonarr?.url
+        enabled: !!isAdmin && !!settings?.sonarr?.url
     })
 
     const downloadQueue = useQuery({
         queryKey: ['sabnzbd', 'queue'],
         queryFn: () => SabnzbdService.getQueue(settings),
-        enabled: !!settings?.sabnzbd?.url,
+        enabled: !!isAdmin && !!settings?.sabnzbd?.url,
         refetchInterval: 5000
+    })
+
+    // User Queries (Requests)
+    const requests = useQuery({
+        queryKey: ['jellyseerr', 'requests'],
+        queryFn: async () => {
+            return JellyseerrService.getRequests ? await JellyseerrService.getRequests(settings) : []
+        },
+        enabled: !isAdmin && !!settings?.jellyseerr?.url
     })
 
     const queue = downloadQueue.data?.queue
     const isDownloading = queue?.status === 'Downloading'
+
+    if (!isAdmin) {
+        // Normal User View
+        return (
+            <div className="container">
+                <header className="mb-8">
+                    <h1 className="text-3xl font-bold mb-2">Welcome, {user?.name}</h1>
+                    <div className="text-gray-400">Here are your latest updates.</div>
+                </header>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* MOTD / Welcome Banner */}
+                        <div className="glass-card p-6 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-500/20">
+                            <h2 className="text-xl font-bold mb-2">Message of the Day</h2>
+                            <p className="text-gray-300">
+                                Welcome to MediaHub! The library has been updated with new 4K content.
+                                Please use the Request feature to ask for new movies and series.
+                            </p>
+                        </div>
+
+                        {/* Recent Requests */}
+                        <div>
+                            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                <MessageSquare size={20} className="text-accent" /> Your Recent Requests
+                            </h2>
+                            <div className="space-y-4">
+                                {(requests.data?.results || []).slice(0, 5).map(req => (
+                                    <div key={req.id} className="glass-card p-4 flex items-center gap-4">
+                                        <div className="w-12 h-16 bg-gray-800 rounded overflow-hidden">
+                                            {req.media?.posterPath && (
+                                                <img
+                                                    src={`https://image.tmdb.org/t/p/w200${req.media.posterPath}`}
+                                                    alt={req.media?.title || 'Poster'}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold">{req.media?.title || req.media?.name || 'Unknown Title'}</div>
+                                            <div className="text-sm text-gray-400">{req.status === 2 ? 'Approved' : req.status === 3 ? 'Declined' : 'Pending'}</div>
+                                        </div>
+                                        <div className={`px-3 py-1 rounded-full text-xs ${req.status === 2 ? 'bg-green-500/20 text-green-400' :
+                                                req.status === 3 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+                                            }`}>
+                                            {req.status === 2 ? 'Available' : req.status === 3 ? 'Declined' : 'Processing'}
+                                        </div>
+                                    </div>
+                                ))}
+                                {(!requests.data?.results || requests.data.results.length === 0) && (
+                                    <div className="glass-card p-8 text-center text-gray-400">
+                                        No recent requests found.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-8">
+                        {/* Report Issue Action */}
+                        <div className="glass-card p-6">
+                            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <AlertCircle size={20} className="text-red-400" /> Report Issue
+                            </h2>
+                            <p className="text-sm text-gray-400 mb-4">
+                                Having trouble with playback or subtitles? Let the admin know.
+                            </p>
+                            <button className="btn-primary w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20">
+                                Report Broken Media
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="container">

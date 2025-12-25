@@ -1,0 +1,73 @@
+.carouselContainer {
+    margin-bottom: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.controlBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.controlBtn:hover {
+    background: var(--glass-hover);
+    color: var(--text-primary);
+}
+
+.viewport {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    margin: 0 -1rem;
+    /* Negative margin to span full width on mobile */
+    padding: 0 1rem;
+}
+
+.viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.track {
+    display: flex;
+    gap: 1rem;
+    width: max-content;
+}
+
+.slide {
+    flex: 0 0 auto;
+    width: 160px;
+    /* Poster width */
+    transition: transform 0.2s;
+}
+
+.slide:hover {
+    transform: translateY(-4px);
+}

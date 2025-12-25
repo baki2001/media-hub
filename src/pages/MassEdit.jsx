@@ -202,6 +202,25 @@ const MassEdit = () => {
                     </div>
                 </header>
 
+                {/* Action Bar */}
+                {selectedIds.size > 0 && (
+                    <div className={styles.actionBar}>
+                        <span className={styles.actionCount}>{selectedIds.size} Items Selected</span>
+                        <div className={styles.actionButtons}>
+                            <button className={styles.actionBtn} onClick={() => setShowModal('quality')}>
+                                <Film size={16} /> Change Quality
+                            </button>
+                            <button className={styles.actionBtn} onClick={() => setShowModal('folder')}>
+                                <Folder size={16} /> Move
+                            </button>
+                            <div className={styles.divider} />
+                            <button className={styles.deleteBtn} onClick={handleDelete}>
+                                <Trash2 size={16} /> Delete
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {isLoading && <div className={styles.loading}>Loading...</div>}
 
                 {!isLoading && (
@@ -257,23 +276,7 @@ const MassEdit = () => {
                 )}
 
                 {/* Action Bar */}
-                {selectedIds.size > 0 && (
-                    <div className={styles.actionBar}>
-                        <span className={styles.actionCount}>{selectedIds.size} Items Selected</span>
-                        <div className={styles.actionButtons}>
-                            <button className={styles.actionBtn} onClick={() => setShowModal('quality')}>
-                                <Film size={16} /> Change Quality
-                            </button>
-                            <button className={styles.actionBtn} onClick={() => setShowModal('folder')}>
-                                <Folder size={16} /> Move
-                            </button>
-                            <div className={styles.divider} />
-                            <button className={styles.deleteBtn} onClick={handleDelete}>
-                                <Trash2 size={16} /> Delete
-                            </button>
-                        </div>
-                    </div>
-                )}
+
             </main>
 
             {/* Quality Modal */}

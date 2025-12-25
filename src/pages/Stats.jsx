@@ -141,7 +141,8 @@ const UserActivityCard = ({ user, rank }) => {
     // Field name variations from different Jellystat versions
     const userName = user.UserName || user.Name || user.name || 'Unknown'
     const totalPlays = user.total_plays || user.TotalPlays || user.Plays || 0
-    const totalDuration = user.total_playback_duration || user.TotalDuration || user.Duration || 0
+    // DB columns often snake_case (total_duration), API might PascalCase (TotalDuration)
+    const totalDuration = user.total_duration || user.total_playback_duration || user.TotalDuration || user.Duration || 0
 
     return (
         <div className={styles.streamCard} style={{ padding: 'var(--space-4)' }}>
@@ -168,7 +169,7 @@ const UserActivityCard = ({ user, rank }) => {
 const ClientCard = ({ client }) => {
     const clientName = client.Client || client.client || client.Name || client.name || 'Unknown'
     const totalPlays = client.total_plays || client.TotalPlays || client.Plays || 0
-    const totalDuration = client.total_playback_duration || client.TotalDuration || client.Duration || 0
+    const totalDuration = client.total_duration || client.total_playback_duration || client.TotalDuration || client.Duration || 0
 
     const getClientIcon = (name) => {
         const lowerName = (name || '').toLowerCase()

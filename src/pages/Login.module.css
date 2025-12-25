@@ -295,3 +295,30 @@
         font-size: 1.75rem;
     }
 }
+
+.optionsRow {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 24px;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.checkboxLabel:hover {
+    color: var(--text-primary);
+}
