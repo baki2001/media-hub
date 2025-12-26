@@ -28,16 +28,45 @@ const Indexers = () => {
         staleTime: 5 * 60 * 1000,
     })
 
-    // ... props ...
+    const { data: indexerStats } = useQuery({
+        queryKey: ['prowlarr', 'stats'],
+        queryFn: () => ProwlarrService.getIndexerStats(settings),
+        enabled: !!settings?.prowlarr?.url,
+        staleTime: 5 * 60 * 1000,
+    })
+
+    // Helper to get stats for a specific indexer
+    const getStatForIndexer = (indexerId) => {
+        if (!indexerStats?.indexers) return { numberOfQueries: 0, numberOfGrabs: 0, numberOfFailedQueries: 0 }
+        const stat = indexerStats.indexers.find(s => s.indexerId === indexerId)
+        return stat || { numberOfQueries: 0, numberOfGrabs: 0, numberOfFailedQueries: 0 }
+    }
 
     const displayedIndexers = (indexers || []).filter(i => !showEnabledOnly || i.enable)
     const enabledCount = (indexers || []).filter(i => i.enable).length
 
-    // ...
-
     return (
         <div className={styles.layout}>
-            {/* ... */}
+            <aside className={styles.sidebar}>
+                <h1 className={styles.sidebarTitle}>
+                    <List className={styles.titleIcon} /> Indexers
+                </h1>
+                <nav className={styles.nav}>
+                    {TABS.map(tab => {
+                        const Icon = tab.icon
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`${styles.navItem} ${activeTab === tab.id ? styles.active : ''}`}
+                            >
+                                <Icon size={18} />
+                                <span>{tab.label}</span>
+                            </button>
+                        )
+                    })}
+                </nav>
+            </aside>
             <main className={styles.main}>
                 {/* Indexers Tab */}
                 {activeTab === 'indexers' && (

@@ -7,12 +7,10 @@ export const PosterWall = () => {
     useEffect(() => {
         const fetchImages = async () => {
             try {
-                // Fetch from our new public endpoint
                 const res = await fetch('/api/public/backdrops')
                 if (res.ok) {
                     const data = await res.json()
-                    // Duplicate for infinite scroll effect
-                    setImages([...data, ...data, ...data])
+                    setImages(data)
                 }
             } catch (e) {
                 console.error('Failed to load backdrops', e)
@@ -23,40 +21,43 @@ export const PosterWall = () => {
 
     if (images.length === 0) return null
 
-    // Split into 3 columns
-    const col1 = images.filter((_, i) => i % 3 === 0)
-    const col2 = images.filter((_, i) => i % 3 === 1)
-    const col3 = images.filter((_, i) => i % 3 === 2)
+    // Create rows for 3D grid (5 rows, each with multiple images)
+    const rows = []
+    const imagesPerRow = 8
+    const numRows = 5
+
+    for (let i = 0; i < numRows; i++) {
+        const rowImages = []
+        for (let j = 0; j < imagesPerRow; j++) {
+            const index = (i * imagesPerRow + j) % images.length
+            if (images[index]) {
+                rowImages.push(images[index])
+            }
+        }
+        // Duplicate for seamless loop
+        rows.push([...rowImages, ...rowImages])
+    }
 
     return (
         <div className={styles.wall}>
             <div className={styles.overlay} />
-            <div className={styles.col}>
-                <div className={styles.trackSlow}>
-                    {col1.map((src, i) => (
-                        <div key={i} className={styles.poster}>
-                            <img src={src} alt="" loading="lazy" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className={styles.col}>
-                <div className={styles.trackFast}>
-                    {col2.map((src, i) => (
-                        <div key={i} className={styles.poster}>
-                            <img src={src} alt="" loading="lazy" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className={styles.col}>
-                <div className={styles.trackMedium}>
-                    {col3.map((src, i) => (
-                        <div key={i} className={styles.poster}>
-                            <img src={src} alt="" loading="lazy" />
-                        </div>
-                    ))}
-                </div>
+            <div className={styles.grid}>
+                {rows.map((rowImages, rowIndex) => (
+                    <div
+                        key={rowIndex}
+                        className={styles.row}
+                        style={{
+                            '--row-index': rowIndex,
+                            '--animation-delay': `${rowIndex * -2}s`
+                        }}
+                    >
+                        {rowImages.map((src, imgIndex) => (
+                            <div key={imgIndex} className={styles.poster}>
+                                <img src={src} alt="" loading="lazy" />
+                            </div>
+                        ))}
+                    </div>
+                ))}
             </div>
         </div>
     )

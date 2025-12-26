@@ -4,86 +4,99 @@
     left: 0;
     width: 100%;
     height: 100vh;
-    display: flex;
     overflow: hidden;
-    gap: 20px;
     z-index: 0;
     background: #000;
-    justify-content: center;
-    opacity: 0.6;
+    perspective: 1000px;
+    perspective-origin: 50% 50%;
 }
 
 .overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.8) 100%);
+    background: radial-gradient(
+        ellipse at center,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.7) 50%,
+        rgba(0, 0, 0, 0.95) 100%
+    );
     z-index: 10;
     pointer-events: none;
 }
 
-.col {
-    width: 20%;
-    height: 100%;
-    position: relative;
+.grid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotateX(25deg) rotateY(0deg);
+    transform-style: preserve-3d;
+    width: 200%;
     display: flex;
     flex-direction: column;
+    gap: 40px;
 }
 
-.trackSlow,
-.trackFast,
-.trackMedium {
+.row {
     display: flex;
-    flex-direction: column;
     gap: 20px;
-    animation: scrollVertical 60s linear infinite;
+    animation: scrollHorizontal 60s linear infinite;
+    animation-delay: var(--animation-delay, 0s);
+    will-change: transform;
+    transform: translateZ(calc(var(--row-index, 0) * -100px));
+    opacity: calc(1 - var(--row-index, 0) * 0.15);
 }
 
-.trackFast {
-    animation-duration: 45s;
-}
-
-.trackMedium {
-    animation-duration: 52s;
-}
-
-/* Alternate direction for middle column */
-.col:nth-child(even) .trackFast {
+/* Alternate direction for odd rows */
+.row:nth-child(odd) {
     animation-direction: reverse;
 }
 
 .poster {
-    width: 100%;
+    flex-shrink: 0;
+    width: 200px;
+    height: 300px;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    opacity: 0.8;
-    transition: opacity 0.3s;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s ease;
+    transform-style: preserve-3d;
 }
 
 .poster img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
-    object-view-box: inset(0 0 0 0);
-    /* Fix for some browsers */
 }
 
-@keyframes scrollVertical {
+@keyframes scrollHorizontal {
     0% {
-        transform: translateY(0);
+        transform: translateX(0) translateZ(calc(var(--row-index, 0) * -100px));
     }
-
     100% {
-        transform: translateY(-50%);
+        transform: translateX(-50%) translateZ(calc(var(--row-index, 0) * -100px));
     }
 }
 
-/* Fade mask at top/bottom */
+/* Vignette effect */
 .wall::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, #000 0%, transparent 20%, transparent 80%, #000 100%);
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.8) 0%,
+        transparent 20%,
+        transparent 80%,
+        rgba(0, 0, 0, 0.8) 100%
+    ),
+    linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.6) 0%,
+        transparent 20%,
+        transparent 80%,
+        rgba(0, 0, 0, 0.6) 100%
+    );
     z-index: 5;
     pointer-events: none;
 }

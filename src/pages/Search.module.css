@@ -1,55 +1,84 @@
-.layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 2rem;
-    height: 100%;
+/* Match Requests.module.css layout pattern */
+.container {
+    display: flex;
+    gap: var(--space-8);
+    min-height: calc(100vh - 48px);
+    padding: var(--space-6);
 }
 
 .sidebar {
-    background: var(--glass-bg);
-    border-right: 1px solid var(--border-color);
-    padding: 1.5rem;
-    height: 100%;
+    width: 260px;
+    flex-shrink: 0;
 }
 
-.sidebarTitle {
+.sidebarHeader {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-6);
+    padding: 0 var(--space-4);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
+    gap: var(--space-2);
     color: var(--accent);
 }
 
 .filterGroup {
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
+    padding: 0 var(--space-4);
 }
 
 .filterGroup label {
     display: block;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
 }
 
-.filterSelect {
-    width: 100%;
-    padding: 0.75rem;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
+.filterOptions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.filterChip {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-align: left;
+}
+
+.filterChip:hover {
+    background: rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
-    outline: none;
+}
+
+.filterChip.active {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--accent);
+    border-color: rgba(13, 148, 136, 0.2);
 }
 
 .mainContent {
-    padding-right: 2rem;
-    padding-bottom: 2rem;
+    flex: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
     overflow-y: auto;
 }
 
 .header {
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-8);
 }
 
 .searchWrapper {

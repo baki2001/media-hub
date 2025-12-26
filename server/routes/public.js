@@ -23,14 +23,21 @@ router.get('/backdrops', async (req, res) => {
         const settings = getSetting('settings') || {}
         let images = []
 
+        console.log('[Backdrops] Fetching posters...')
+        console.log('[Backdrops] Radarr configured:', !!settings.radarr?.url)
+        console.log('[Backdrops] Sonarr configured:', !!settings.sonarr?.url)
+
         // Try Radarr first (usually high quality posters)
         if (settings.radarr?.url && settings.radarr?.apiKey) {
             try {
+                console.log(`[Backdrops] Fetching from Radarr: ${settings.radarr.url}`)
                 const response = await axios.get(`${settings.radarr.url}/api/v3/movie?page=1&pageSize=50`, {
                     headers: { 'X-Api-Key': settings.radarr.apiKey },
-                    timeout: 5000
+                    timeout: 10000
                 })
                 const movies = response.data || []
+                console.log(`[Backdrops] Radarr returned ${movies.length} movies`)
+
                 // Map to local proxy URL
                 const radarrImages = movies
                     .filter(m => m.images && m.images.length > 0)
@@ -42,20 +49,30 @@ router.get('/backdrops', async (req, res) => {
                     .filter(Boolean)
                     .slice(0, 50)
 
+                console.log(`[Backdrops] Extracted ${radarrImages.length} Radarr posters`)
                 images = [...images, ...radarrImages]
             } catch (e) {
-                console.error('Failed to fetch Radarr backdrops:', e.message)
+                console.error('[Backdrops] Failed to fetch Radarr backdrops:', e.message)
+                if (e.response) {
+                    console.error('[Backdrops] Radarr response status:', e.response.status)
+                    console.error('[Backdrops] Radarr response data:', e.response.data)
+                }
             }
+        } else {
+            console.log('[Backdrops] Radarr not configured or missing API key')
         }
 
         // Try Sonarr if needed
         if (images.length < 20 && settings.sonarr?.url && settings.sonarr?.apiKey) {
             try {
+                console.log(`[Backdrops] Fetching from Sonarr: ${settings.sonarr.url}`)
                 const response = await axios.get(`${settings.sonarr.url}/api/v3/series?page=1&pageSize=50`, {
                     headers: { 'X-Api-Key': settings.sonarr.apiKey },
-                    timeout: 5000
+                    timeout: 10000
                 })
                 const series = response.data || []
+                console.log(`[Backdrops] Sonarr returned ${series.length} series`)
+
                 const sonarrImages = series
                     .filter(s => s.images && s.images.length > 0)
                     .map(s => {
@@ -65,20 +82,27 @@ router.get('/backdrops', async (req, res) => {
                     })
                     .filter(Boolean)
                     .slice(0, 50)
+
+                console.log(`[Backdrops] Extracted ${sonarrImages.length} Sonarr posters`)
                 images = [...images, ...sonarrImages]
             } catch (e) {
-                console.error('Failed to fetch Sonarr backdrops:', e.message)
+                console.error('[Backdrops] Failed to fetch Sonarr backdrops:', e.message)
+                if (e.response) {
+                    console.error('[Backdrops] Sonarr response status:', e.response.status)
+                    console.error('[Backdrops] Sonarr response data:', e.response.data)
+                }
             }
+        } else if (images.length < 20) {
+            console.log('[Backdrops] Sonarr not configured or missing API key')
         }
 
-        // Fallback to TMDB via public proxy logic if local fails? 
-        // Or just return what we have.
         // Shuffle images
         images = images.sort(() => 0.5 - Math.random())
 
+        console.log(`[Backdrops] Returning ${images.length} total posters`)
         res.json(images)
     } catch (error) {
-        console.error('Backdrop error:', error)
+        console.error('[Backdrops] Unexpected error:', error)
         res.status(500).json([])
     }
 })
