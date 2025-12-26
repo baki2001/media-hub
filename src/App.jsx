@@ -20,6 +20,7 @@ import SubtitlesPage from './pages/Subtitles'
 import FileFlows from './pages/FileFlows'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { NotificationProvider } from './context/NotificationContext'
+import BackdropManager from './components/BackdropManager'
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth()
@@ -31,6 +32,7 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <ErrorBoundary>
+      <BackdropManager />
       <AuthProvider>
         <NotificationProvider>
           <Routes>

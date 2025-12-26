@@ -45,6 +45,41 @@ const Indexers = () => {
     const displayedIndexers = (indexers || []).filter(i => !showEnabledOnly || i.enable)
     const enabledCount = (indexers || []).filter(i => i.enable).length
 
+    // Handle indexer search
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) return
+
+        setIsSearching(true)
+        try {
+            const results = await ProwlarrService.searchIndexers(settings, searchQuery)
+            setSearchResults(results || [])
+            if (results?.length === 0) {
+                addNotification('No results found', 'info')
+            }
+        } catch (error) {
+            console.error('Search error:', error)
+            addNotification('Search failed: ' + error.message, 'error')
+            setSearchResults([])
+        } finally {
+            setIsSearching(false)
+        }
+    }
+
+    // Toggle indexer enabled/disabled
+    const toggleMutation = useMutation({
+        mutationFn: async ({ indexer, enabled }) => {
+            return ProwlarrService.updateIndexer(settings, indexer.id, { ...indexer, enable: enabled })
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['prowlarr', 'indexers'])
+            addNotification('Indexer updated successfully', 'success')
+        },
+        onError: (error) => {
+            console.error('Toggle error:', error)
+            addNotification('Failed to update indexer: ' + error.message, 'error')
+        }
+    })
+
     return (
         <div className={styles.layout}>
             <aside className={styles.sidebar}>

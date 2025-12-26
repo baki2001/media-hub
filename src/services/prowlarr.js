@@ -30,4 +30,15 @@ export const ProwlarrService = {
             method: 'PUT',
             body: JSON.stringify({ ...indexer, enable: enabled })
         }),
+
+    // Alias for search (used by Indexers page)
+    searchIndexers: (settings, query) =>
+        fetchFromService(settings, 'prowlarr', `/api/v1/search?query=${encodeURIComponent(query)}`),
+
+    // Alias for toggleIndexer (used by Indexers page)
+    updateIndexer: (settings, indexerId, indexerData) =>
+        fetchFromService(settings, 'prowlarr', `/api/v1/indexer/${indexerId}`, {
+            method: 'PUT',
+            body: JSON.stringify(indexerData)
+        }),
 }
