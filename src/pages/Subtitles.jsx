@@ -72,6 +72,16 @@ const SubtitlesPage = () => {
         return []
     }
 
+    // Parse episode number from "2x10" format
+    const parseEpisodeString = (epString) => {
+        if (!epString) return null
+        const match = epString.match(/(\d+)x(\d+)/)
+        if (match) {
+            return `S${match[1].padStart(2, '0')}E${match[2].padStart(2, '0')}`
+        }
+        return epString
+    }
+
     // Filter wanted items based on search
     const filteredMovies = useMemo(() => {
         const movies = getMoviesArray(wantedMovies)
@@ -233,7 +243,7 @@ const SubtitlesPage = () => {
                                         <div key={`${ep.sonarrSeriesId}-${ep.sonarrEpisodeId}`} className={styles.card}>
                                             <div className={styles.cardContent}>
                                                 <h4 className={styles.cardTitle}>
-                                                    {ep.seriesTitle} - S{String(ep.season).padStart(2, '0')}E{String(ep.episode).padStart(2, '0')}
+                                                    {ep.seriesTitle} - {parseEpisodeString(ep.episode_number) || `S${String(ep.season).padStart(2, '0')}E${Number(ep.episode).toString().padStart(2, '0')}`}
                                                 </h4>
                                                 <p className={styles.cardSubtitle}>{ep.title}</p>
                                                 <div className={styles.langTags}>
@@ -324,7 +334,7 @@ const SubtitlesPage = () => {
                     </>
                 )}
             </main>
-        </div>
+        </div >
     )
 }
 

@@ -143,6 +143,7 @@ const UserActivityCard = ({ user, rank }) => {
     const totalPlays = user.total_plays || user.TotalPlays || user.Plays || 0
     // DB columns often snake_case (total_duration), API might PascalCase (TotalDuration)
     const totalDuration = user.total_duration || user.total_playback_duration || user.TotalDuration || user.Duration || 0
+    const showDuration = totalDuration > 0
 
     return (
         <div className={styles.streamCard} style={{ padding: 'var(--space-4)' }}>
@@ -152,9 +153,11 @@ const UserActivityCard = ({ user, rank }) => {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600 }}>{userName}</div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                        {formatDuration(totalDuration)} watch time
-                    </div>
+                    {showDuration && (
+                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                            {formatDuration(totalDuration)} watch time
+                        </div>
+                    )}
                 </div>
                 <div style={{ textAlign: 'right', fontSize: 'var(--font-size-sm)' }}>
                     <div style={{ fontWeight: 700 }}>{totalPlays}</div>
@@ -170,6 +173,7 @@ const ClientCard = ({ client }) => {
     const clientName = client.Client || client.client || client.Name || client.name || 'Unknown'
     const totalPlays = client.total_plays || client.TotalPlays || client.Plays || 0
     const totalDuration = client.total_duration || client.total_playback_duration || client.TotalDuration || client.Duration || 0
+    const showDuration = totalDuration > 0
 
     const getClientIcon = (name) => {
         const lowerName = (name || '').toLowerCase()
@@ -188,9 +192,11 @@ const ClientCard = ({ client }) => {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600 }}>{clientName}</div>
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                        {formatDuration(totalDuration)}
-                    </div>
+                    {showDuration && (
+                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                            {formatDuration(totalDuration)}
+                        </div>
+                    )}
                 </div>
                 <div style={{ textAlign: 'right', fontSize: 'var(--font-size-sm)' }}>
                     <div style={{ fontWeight: 700 }}>{totalPlays}</div>

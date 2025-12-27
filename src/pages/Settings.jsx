@@ -21,8 +21,8 @@ const TABS = [
 
 const SERVICES = [
     { key: 'jellyfin', label: 'Jellyfin', description: 'Media Server', icon: Film },
-    { key: 'radarr', label: 'Radarr', description: 'Movies management', icon: Film, hasRestart: true },
-    { key: 'sonarr', label: 'Sonarr', description: 'TV Shows management', icon: Tv, hasRestart: true },
+    { key: 'radarr', label: 'Radarr', description: 'Movies management', icon: Film },
+    { key: 'sonarr', label: 'Sonarr', description: 'TV Shows management', icon: Tv },
     { key: 'prowlarr', label: 'Prowlarr', description: 'Indexer management', icon: Search },
     { key: 'bazarr', label: 'Bazarr', description: 'Subtitles management', icon: Subtitles },
     { key: 'sabnzbd', label: 'SABnzbd', description: 'Usenet downloader', icon: Download },

@@ -1,11 +1,23 @@
 // Centralized version and changelog information
 // Update this file when releasing new versions
 
-export const VERSION = '2.4.0'
-export const BUILD_DATE = '2025-12-25'
-export const BUILD_ID = '2025-12-25T21:30'
+export const VERSION = '3.0.0'
+export const BUILD_DATE = '2025-12-27'
+export const BUILD_ID = '2025-12-27T17:00'
 
 export const CHANGELOG = [
+    {
+        version: '3.0.0',
+        date: '2025-12-27',
+        title: 'Performance & Refinement Release',
+        changes: [
+            'Library performance overhaul (Poster caching & prefetching)',
+            'Search improvements: "Available" badge for existing media',
+            'Bazarr subtitle search fix (Targeted search)',
+            'Stats page cleanup (Smart duration display)',
+            'Settings UI refinement (Removed service controls)'
+        ]
+    },
     {
         version: '2.4.0',
         date: '2025-12-25',

@@ -68,7 +68,15 @@ export const fetchFromService = async (settings, serviceName, endpoint, options 
         const errorText = await response.text()
         throw new Error(errorText || `Service error: ${response.statusText}`)
     }
-    return response.json()
+
+    if (response.status === 204) return null
+
+    const text = await response.text()
+    try {
+        return text ? JSON.parse(text) : null
+    } catch (e) {
+        return text
+    }
 }
 
 /**

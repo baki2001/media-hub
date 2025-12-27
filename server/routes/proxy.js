@@ -68,9 +68,21 @@ router.all('/:service/*', async (req, res) => {
         // Get response content type
         const contentType = response.headers.get('content-type') || ''
 
-        if (contentType.includes('application/json')) {
-            const data = await response.json()
-            res.status(response.status).json(data)
+        if (response.status === 204) {
+            res.status(204).end()
+        } else if (contentType.includes('application/json')) {
+            const text = await response.text()
+            if (!text.trim()) {
+                res.status(response.status).end()
+            } else {
+                try {
+                    const data = JSON.parse(text)
+                    res.status(response.status).json(data)
+                } catch (e) {
+                    console.warn(`Failed to parse JSON for ${service}:`, e.message)
+                    res.status(response.status).send(text)
+                }
+            }
         } else if (contentType.includes('image/')) {
             // Handle image responses (for posters, banners, etc.)
             res.setHeader('Content-Type', contentType)

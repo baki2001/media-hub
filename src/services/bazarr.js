@@ -27,9 +27,9 @@ export const BazarrService = {
             method: 'PATCH'
         }),
 
-    // Search for episode subtitles
-    searchEpisodeSubtitles: (settings, sonarrEpisodeId) =>
-        fetchFromService(settings, 'bazarr', `/api/episodes?episodeid[]=${sonarrEpisodeId}&action=search-missing`, {
+    // Search for episode subtitles (triggers series search)
+    searchEpisodeSubtitles: (settings, sonarrEpisodeId, sonarrSeriesId) =>
+        fetchFromService(settings, 'bazarr', `/api/series?seriesid[]=${sonarrSeriesId}&action=search-missing`, {
             method: 'PATCH'
         }),
 
