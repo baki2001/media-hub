@@ -204,7 +204,6 @@
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-root);
-  background-image: var(--bg-gradient);
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;

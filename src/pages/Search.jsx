@@ -98,6 +98,32 @@ const SearchPage = () => {
         enabled: !debouncedTerm && isJellyseerrConfigured
     })
 
+    // Library Availability
+    const moviesQuery = useQuery({
+        queryKey: ['movies', settings?.radarr?.url],
+        queryFn: () => RadarrService.getMovies(settings),
+        enabled: !!settings?.radarr?.url,
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const seriesQuery = useQuery({
+        queryKey: ['series', settings?.sonarr?.url],
+        queryFn: () => SonarrService.getSeries(settings),
+        enabled: !!settings?.sonarr?.url,
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const existingIds = useMemo(() => {
+        const ids = new Set()
+        if (moviesQuery.data) {
+            moviesQuery.data.forEach(m => ids.add(`movie-${m.tmdbId}`))
+        }
+        if (seriesQuery.data) {
+            seriesQuery.data.forEach(s => ids.add(`tv-${s.tvdbId}`))
+        }
+        return ids
+    }, [moviesQuery.data, seriesQuery.data])
+
     const handleRequest = async () => {
         if (!selectedItem) return
         try {
@@ -120,34 +146,45 @@ const SearchPage = () => {
         }
     }
 
-    const renderCard = (item) => (
-        <div key={item.id} className={styles.resultCard} onClick={() => setSelectedItem(item)}>
-            <div className={styles.posterWrapper}>
-                <img
-                    src={`https://image.tmdb.org/t/p/w500${item.posterPath}`}
-                    className={styles.poster}
-                    loading="lazy"
-                    alt={item.title || item.name}
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/300x450?text=No+Image' }}
-                />
-                <div className={styles.overlay}>
-                    <button className={styles.addBtn}>
-                        <Plus size={20} /> Request
-                    </button>
-                    {/* In Library Badge could go here */}
+    const renderCard = (item) => {
+        const isMovie = item.mediaType === 'movie' || (!item.mediaType && !item.name)
+        const idKey = isMovie ? `movie-${item.id}` : `tv-${item.tvdbId || item.id}`
+        const isAvailable = existingIds.has(idKey)
+
+        return (
+            <div key={item.id} className={styles.resultCard} onClick={() => setSelectedItem(item)}>
+                <div className={styles.posterWrapper}>
+                    <img
+                        src={`https://image.tmdb.org/t/p/w500${item.posterPath}`}
+                        className={styles.poster}
+                        loading="lazy"
+                        alt={item.title || item.name}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/300x450?text=No+Image' }}
+                    />
+                    <div className={styles.overlay}>
+                        {isAvailable ? (
+                            <div className="flex items-center gap-2 bg-green-500/80 text-white px-3 py-1.5 rounded-full font-medium backdrop-blur-sm">
+                                <Check size={18} /> Available
+                            </div>
+                        ) : (
+                            <button className={styles.addBtn}>
+                                <Plus size={20} /> Request
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className={styles.cardInfo}>
+                    <h3 className={styles.cardTitle} title={item.title || item.name}>{item.title || item.name}</h3>
+                    <div className={styles.cardMeta}>
+                        <span>{(item.releaseDate || item.firstAirDate || '').split('-')[0]}</span>
+                        <span className={styles.typeBadge}>
+                            {isMovie ? 'Movie' : 'Series'}
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div className={styles.cardInfo}>
-                <h3 className={styles.cardTitle} title={item.title || item.name}>{item.title || item.name}</h3>
-                <div className={styles.cardMeta}>
-                    <span>{(item.releaseDate || item.firstAirDate || '').split('-')[0]}</span>
-                    <span className={styles.typeBadge}>
-                        {item.mediaType === 'movie' || (!item.mediaType && !item.name) ? 'Movie' : 'Series'}
-                    </span>
-                </div>
-            </div>
-        </div>
-    )
+        )
+    }
 
     return (
         <div className={styles.container}>

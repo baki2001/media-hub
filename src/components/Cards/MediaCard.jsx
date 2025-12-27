@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { getPosterUrl } from '../../services/media'
+import { posterCache } from '../../services/posterCache'
 import { Monitor, HardDrive, AlertTriangle, CheckCircle, AlertCircle, Clock } from 'lucide-react'
 import styles from './MediaCard.module.css'
 
 const MediaCard = ({ item, type, settings, onClick }) => {
+    const [cachedPoster, setCachedPoster] = useState(null)
+
     // Logic to determine if items are available or missing
     // In Search Results: Radarr returns 'id' if it exists in DB, otherwise 0 or undefined.
     // Sonarr similar.
@@ -13,16 +16,28 @@ const MediaCard = ({ item, type, settings, onClick }) => {
     const isAvailable = item.hasFile || item.statistics?.percentOfEpisodes === 100
     const isMissing = inLibrary && !isAvailable && item.monitored
 
-    const posterUrl = getPosterUrl(settings, type,
+    const originalPosterUrl = getPosterUrl(settings, type,
         item.images?.find(i => i.coverType === 'poster')?.url || item.remotePoster
     )
+
+    useEffect(() => {
+        let active = true
+        if (originalPosterUrl) {
+            posterCache.get(originalPosterUrl).then(url => {
+                if (active) setCachedPoster(url)
+            })
+        }
+        return () => { active = false }
+    }, [originalPosterUrl])
+
+    const displayPoster = cachedPoster || originalPosterUrl
 
     return (
         <div className={styles.card} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
 
             <div className={styles.posterContainer}>
-                {posterUrl ? (
-                    <img src={posterUrl} alt={item.title} className={styles.poster} loading="lazy" />
+                {displayPoster ? (
+                    <img src={displayPoster} alt={item.title} className={styles.poster} loading="lazy" />
                 ) : (
                     <div className={styles.fallbackPoster}>{item.title}</div>
                 )}

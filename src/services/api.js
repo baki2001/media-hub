@@ -192,7 +192,7 @@ export const JellyseerrService = {
     getPopularSeries: (settings) => fetchFromService(settings, 'jellyseerr', 'api/v1/discover/tv?page=1&sortBy=popularity.desc'),
     getUpcomingMovies: (settings) => fetchFromService(settings, 'jellyseerr', 'api/v1/discover/movies/upcoming'),
     getUpcomingSeries: (settings) => fetchFromService(settings, 'jellyseerr', 'api/v1/discover/tv/upcoming'),
-    search: (settings, query) => fetchFromService(settings, 'jellyseerr', `api/v1/search?query=${encodeURIComponent(query)}&page=1&take=20`),
+    search: (settings, query) => fetchFromService(settings, 'jellyseerr', `api/v1/search?query=${encodeURIComponent(query)}&page=1`),
     createRequest: (settings, payload) => fetchFromService(settings, 'jellyseerr', 'api/v1/request', {
         method: 'POST',
         body: JSON.stringify(payload)

@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSettings } from '../context/SettingsContext'
-import { RadarrService, SonarrService } from '../services/media'
+import { RadarrService, SonarrService, getPosterUrl } from '../services/media'
+import { posterCache } from '../services/posterCache'
 import MediaCard from '../components/Cards/MediaCard'
 import MediaDetailsModal from '../components/Modals/MediaDetailsModal'
 import { Tabs, MediaCardSkeleton } from '../components/Common'
@@ -66,6 +67,20 @@ const Library = () => {
             return 0
         })
     }, [items, sortMode, searchQuery])
+
+    // Prefetch visible images (and a bit more)
+    useEffect(() => {
+        if (!items.length) return
+
+        const urls = items.slice(0, 50).map(item => {
+            const type = isMovies ? 'movie' : 'series'
+            return getPosterUrl(settings, type,
+                item.images?.find(i => i.coverType === 'poster')?.url || item.remotePoster
+            )
+        }).filter(Boolean)
+
+        posterCache.prefetch(urls)
+    }, [items, isMovies, settings])
 
     return (
         <div className={styles.container}>

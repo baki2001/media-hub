@@ -23,16 +23,14 @@ export const BazarrService = {
 
     // Search for movie subtitles
     searchMovieSubtitles: (settings, radarrId) =>
-        fetchFromService(settings, 'bazarr', `/api/movies/${radarrId}/subtitles`, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'search' })
+        fetchFromService(settings, 'bazarr', `/api/movies?radarrid[]=${radarrId}&action=search-missing`, {
+            method: 'PATCH'
         }),
 
     // Search for episode subtitles
-    searchEpisodeSubtitles: (settings, sonarrEpisodeId, sonarrSeriesId) =>
-        fetchFromService(settings, 'bazarr', `/api/episodes/${sonarrEpisodeId}/subtitles`, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'search' })
+    searchEpisodeSubtitles: (settings, sonarrEpisodeId) =>
+        fetchFromService(settings, 'bazarr', `/api/episodes?episodeid[]=${sonarrEpisodeId}&action=search-missing`, {
+            method: 'PATCH'
         }),
 
     // Get history
