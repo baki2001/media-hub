@@ -21,10 +21,10 @@ export const PosterWall = () => {
 
     if (images.length === 0) return null
 
-    // Create rows for 3D grid (5 rows, each with multiple images)
+    // Create rows for 3D grid (7 rows for better coverage with diagonal tilt)
     const rows = []
-    const imagesPerRow = 8
-    const numRows = 5
+    const imagesPerRow = 12
+    const numRows = 7
 
     for (let i = 0; i < numRows; i++) {
         const rowImages = []
@@ -34,8 +34,8 @@ export const PosterWall = () => {
                 rowImages.push(images[index])
             }
         }
-        // Duplicate for seamless loop
-        rows.push([...rowImages, ...rowImages])
+        // Triple the images for seamless infinite scroll
+        rows.push([...rowImages, ...rowImages, ...rowImages])
     }
 
     return (
@@ -48,7 +48,7 @@ export const PosterWall = () => {
                         className={styles.row}
                         style={{
                             '--row-index': rowIndex,
-                            '--animation-delay': `${rowIndex * -2}s`
+                            '--animation-delay': `${rowIndex * -3}s`
                         }}
                     >
                         {rowImages.map((src, imgIndex) => (

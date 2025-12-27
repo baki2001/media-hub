@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AppLayout from './components/Layout/AppLayout'
 import ErrorBoundary from './components/ErrorBoundary'
 
@@ -29,12 +29,20 @@ const ProtectedRoute = ({ children }) => {
   return children
 }
 
+// Wrapper component to conditionally render BackdropManager
+const ConditionalBackdrop = () => {
+  const location = useLocation()
+  // Don't render on login - it has its own PosterWall
+  if (location.pathname === '/login') return null
+  return <BackdropManager />
+}
+
 function App() {
   return (
     <ErrorBoundary>
-      <BackdropManager />
       <AuthProvider>
         <NotificationProvider>
+          <ConditionalBackdrop />
           <Routes>
             <Route path="/login" element={<Login />} />
 
@@ -67,3 +75,4 @@ function App() {
 }
 
 export default App
+

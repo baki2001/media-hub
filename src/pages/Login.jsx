@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { Server, User, Key, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { Server, User, Lock, ArrowRight, Eye, EyeOff, Loader } from 'lucide-react'
 import { PosterWall } from '../components/Common/PosterWall'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter, Input, Button } from '../components/ui'
 import styles from './Login.module.css'
 
 const Login = () => {
@@ -59,91 +58,112 @@ const Login = () => {
 
     return (
         <div className={styles.container}>
-            {/* Dynamic Background */}
+            {/* Dynamic 3D Poster Background */}
             <PosterWall />
 
             {/* Login Card */}
             <div className={styles.cardWrapper}>
-                <Card className={styles.loginCard}>
-                    <CardHeader className={styles.header}>
+                <div className={styles.loginCard}>
+                    {/* Header */}
+                    <div className={styles.header}>
                         <div className={styles.iconWrapper}>
                             <svg className={styles.logoSvg} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                                 <path d="M4 8V6a2 2 0 012-2h2M4 16v2a2 2 0 002 2h2M16 4h2a2 2 0 012 2v2M16 20h2a2 2 0 002-2v-2" />
                                 <circle cx="12" cy="12" r="4" />
                             </svg>
                         </div>
-                        <CardTitle className="text-center text-2xl">
-                            MediaHub <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-2">v2.0</span>
-                        </CardTitle>
+                        <h1 className={styles.title}>
+                            MediaHub
+                            <span className={styles.versionBadge}>v2.4</span>
+                        </h1>
                         <p className={styles.subtitle}>Connect to your Jellyfin server</p>
-                    </CardHeader>
+                    </div>
 
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                            <Input
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        {/* Server URL */}
+                        <div className={styles.inputGroup}>
+                            <Server size={18} className={styles.inputIcon} />
+                            <input
+                                type="text"
+                                className={styles.input}
                                 placeholder="Server URL (http://192.168.1.10:8096)"
                                 value={serverUrl}
                                 onChange={e => setServerUrl(e.target.value)}
                                 required
-                                error={error && !serverUrl ? 'Required' : null}
                             />
+                        </div>
 
-                            <Input
+                        {/* Username */}
+                        <div className={styles.inputGroup}>
+                            <User size={18} className={styles.inputIcon} />
+                            <input
+                                type="text"
+                                className={styles.input}
                                 placeholder="Username"
                                 value={username}
                                 onChange={e => setUsername(e.target.value)}
                                 required
                             />
+                        </div>
 
-                            <div className="relative">
-                                <Input
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Password"
-                                    value={password}
-                                    onChange={e => setPassword(e.target.value)}
-                                    className="pr-10"
-                                />
-                                <button
-                                    type="button"
-                                    className={styles.eyeBtn}
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            </div>
-
-                            {error && (
-                                <div className="text-red-500 text-sm text-center bg-red-500/10 p-2 rounded">
-                                    {error}
-                                </div>
-                            )}
-
-                            <label className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={rememberMe}
-                                    onChange={e => setRememberMe(e.target.checked)}
-                                    className={styles.checkbox}
-                                />
-                                <span>Remember Me</span>
-                            </label>
-
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                className="w-full mt-2"
-                                isLoading={loading}
-                                rightIcon={!loading && <ArrowRight size={18} />}
+                        {/* Password */}
+                        <div className={styles.inputGroup}>
+                            <Lock size={18} className={styles.inputIcon} />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className={styles.input}
+                                placeholder="Password"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                className={styles.eyeBtn}
+                                onClick={() => setShowPassword(!showPassword)}
                             >
-                                Connect
-                            </Button>
-                        </form>
-                    </CardContent>
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
 
-                    <CardFooter className="justify-center text-sm text-muted">
-                        Requires a Jellyfin Administrator account
-                    </CardFooter>
-                </Card>
+                        {/* Error Message */}
+                        {error && (
+                            <div className={styles.error}>
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Remember Me */}
+                        <label className={styles.checkboxLabel}>
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={e => setRememberMe(e.target.checked)}
+                                className={styles.checkbox}
+                            />
+                            <span>Remember me</span>
+                        </label>
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            className={styles.submitBtn}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader size={18} className="animate-spin" />
+                                    Connecting...
+                                </>
+                            ) : (
+                                <>
+                                    Connect
+                                    <ArrowRight size={18} />
+                                </>
+                            )}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     )

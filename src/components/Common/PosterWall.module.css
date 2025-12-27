@@ -7,19 +7,17 @@
     overflow: hidden;
     z-index: 0;
     background: #000;
-    perspective: 1000px;
+    perspective: 1200px;
     perspective-origin: 50% 50%;
 }
 
 .overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-        ellipse at center,
-        rgba(0, 0, 0, 0.3) 0%,
-        rgba(0, 0, 0, 0.7) 50%,
-        rgba(0, 0, 0, 0.95) 100%
-    );
+    background: radial-gradient(ellipse 80% 60% at center,
+            rgba(0, 0, 0, 0.2) 0%,
+            rgba(0, 0, 0, 0.6) 40%,
+            rgba(0, 0, 0, 0.95) 100%);
     z-index: 10;
     pointer-events: none;
 }
@@ -28,22 +26,23 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) rotateX(25deg) rotateY(0deg);
+    /* Netflix-style diagonal perspective */
+    transform: translate(-50%, -50%) rotateX(35deg) rotateY(-12deg) rotateZ(2deg);
     transform-style: preserve-3d;
-    width: 200%;
+    width: 300%;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 6px;
 }
 
 .row {
     display: flex;
-    gap: 20px;
-    animation: scrollHorizontal 60s linear infinite;
+    gap: 8px;
+    animation: scrollHorizontal 200s linear infinite;
     animation-delay: var(--animation-delay, 0s);
     will-change: transform;
-    transform: translateZ(calc(var(--row-index, 0) * -100px));
-    opacity: calc(1 - var(--row-index, 0) * 0.15);
+    transform: translateZ(calc(var(--row-index, 0) * -60px));
+    opacity: calc(1 - var(--row-index, 0) * 0.12);
 }
 
 /* Alternate direction for odd rows */
@@ -53,13 +52,15 @@
 
 .poster {
     flex-shrink: 0;
-    width: 200px;
-    height: 300px;
+    width: 180px;
+    height: 270px;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    transition: transform 0.3s ease;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
     transform-style: preserve-3d;
+    background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
 }
 
 .poster img {
@@ -67,36 +68,41 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 0.4s ease;
 }
 
 @keyframes scrollHorizontal {
     0% {
-        transform: translateX(0) translateZ(calc(var(--row-index, 0) * -100px));
+        transform: translateX(0) translateZ(calc(var(--row-index, 0) * -60px));
     }
+
     100% {
-        transform: translateX(-50%) translateZ(calc(var(--row-index, 0) * -100px));
+        transform: translateX(-50%) translateZ(calc(var(--row-index, 0) * -60px));
     }
 }
 
-/* Vignette effect */
+/* Strong vignette on all edges */
+.wall::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, transparent 15%, transparent 85%, rgba(0, 0, 0, 0.9) 100%),
+        linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, transparent 15%, transparent 85%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Additional depth fade */
 .wall::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.8) 0%,
-        transparent 20%,
-        transparent 80%,
-        rgba(0, 0, 0, 0.8) 100%
-    ),
-    linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.6) 0%,
-        transparent 20%,
-        transparent 80%,
-        rgba(0, 0, 0, 0.6) 100%
-    );
-    z-index: 5;
+    background: radial-gradient(circle at 50% 50%,
+            transparent 0%,
+            transparent 20%,
+            rgba(0, 0, 0, 0.4) 60%,
+            rgba(0, 0, 0, 0.8) 100%);
+    z-index: 6;
     pointer-events: none;
 }

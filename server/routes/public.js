@@ -18,14 +18,40 @@ const getApiKey = (serviceName) => {
 }
 
 
+// Fallback posters from TMDB for when services aren't configured
+const FALLBACK_POSTERS = [
+    'https://image.tmdb.org/t/p/w342/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg', // The Matrix
+    'https://image.tmdb.org/t/p/w342/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg', // The Shawshank Redemption
+    'https://image.tmdb.org/t/p/w342/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg', // The Lord of the Rings
+    'https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg', // The Dark Knight
+    'https://image.tmdb.org/t/p/w342/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg', // Pulp Fiction
+    'https://image.tmdb.org/t/p/w342/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', // Fight Club
+    'https://image.tmdb.org/t/p/w342/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg', // Inception
+    'https://image.tmdb.org/t/p/w342/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', // Interstellar
+    'https://image.tmdb.org/t/p/w342/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg', // Forrest Gump
+    'https://image.tmdb.org/t/p/w342/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', // The Godfather
+    'https://image.tmdb.org/t/p/w342/velWPhVMQeQKcxggNEU8YmIo52R.jpg', // Jurassic Park
+    'https://image.tmdb.org/t/p/w342/rplLJ2hPcOQmkFhTqUte0MkEaO2.jpg', // The Departed
+    'https://image.tmdb.org/t/p/w342/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg', // Harry Potter
+    'https://image.tmdb.org/t/p/w342/bOGkgRGdhrBYJSLpXaxhXVstddV.jpg', // Spirited Away
+    'https://image.tmdb.org/t/p/w342/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg', // Joker
+    'https://image.tmdb.org/t/p/w342/d5NXSklXo0qyIYkgV94XAgMIckC.jpg', // Dune
+    'https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', // Spider-Man
+    'https://image.tmdb.org/t/p/w342/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg', // Oppenheimer
+    'https://image.tmdb.org/t/p/w342/AtsgWhDnHTq68L0lLsUrCnM7TjG.jpg', // Deadpool
+    'https://image.tmdb.org/t/p/w342/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg', // Barbie
+    'https://image.tmdb.org/t/p/w342/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg', // Avengers
+    'https://image.tmdb.org/t/p/w342/ziEuG1essDuWuC5lpWUaw1uXY2O.jpg', // Titanic
+    'https://image.tmdb.org/t/p/w342/jRXYjXNq0Cs2TcJjLkki24MLp7u.jpg', // Avatar
+    'https://image.tmdb.org/t/p/w342/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg', // Gladiator
+]
+
 router.get('/backdrops', async (req, res) => {
     try {
         const settings = getSetting('settings') || {}
         let images = []
 
         console.log('[Backdrops] Fetching posters...')
-        console.log('[Backdrops] Radarr configured:', !!settings.radarr?.url)
-        console.log('[Backdrops] Sonarr configured:', !!settings.sonarr?.url)
 
         // Try Radarr first (usually high quality posters)
         if (settings.radarr?.url && settings.radarr?.apiKey) {
@@ -38,7 +64,6 @@ router.get('/backdrops', async (req, res) => {
                 const movies = response.data || []
                 console.log(`[Backdrops] Radarr returned ${movies.length} movies`)
 
-                // Map to local proxy URL
                 const radarrImages = movies
                     .filter(m => m.images && m.images.length > 0)
                     .map(m => {
@@ -53,13 +78,7 @@ router.get('/backdrops', async (req, res) => {
                 images = [...images, ...radarrImages]
             } catch (e) {
                 console.error('[Backdrops] Failed to fetch Radarr backdrops:', e.message)
-                if (e.response) {
-                    console.error('[Backdrops] Radarr response status:', e.response.status)
-                    console.error('[Backdrops] Radarr response data:', e.response.data)
-                }
             }
-        } else {
-            console.log('[Backdrops] Radarr not configured or missing API key')
         }
 
         // Try Sonarr if needed
@@ -87,13 +106,13 @@ router.get('/backdrops', async (req, res) => {
                 images = [...images, ...sonarrImages]
             } catch (e) {
                 console.error('[Backdrops] Failed to fetch Sonarr backdrops:', e.message)
-                if (e.response) {
-                    console.error('[Backdrops] Sonarr response status:', e.response.status)
-                    console.error('[Backdrops] Sonarr response data:', e.response.data)
-                }
             }
-        } else if (images.length < 20) {
-            console.log('[Backdrops] Sonarr not configured or missing API key')
+        }
+
+        // Use fallback posters if no service images available
+        if (images.length === 0) {
+            console.log('[Backdrops] No service images, using fallback TMDB posters')
+            images = [...FALLBACK_POSTERS]
         }
 
         // Shuffle images
@@ -103,7 +122,8 @@ router.get('/backdrops', async (req, res) => {
         res.json(images)
     } catch (error) {
         console.error('[Backdrops] Unexpected error:', error)
-        res.status(500).json([])
+        // Return fallback posters even on error
+        res.json(FALLBACK_POSTERS)
     }
 })
 
