@@ -55,6 +55,8 @@ if npm run build >> "$LOG_FILE" 2>&1; then
     if [ -d "dist" ]; then
         DIST_SIZE=$(du -sh dist | cut -f1)
         log "✓ Dist folder created (size: $DIST_SIZE)"
+        log "Debug: Listing first 10 assets:"
+        ls -la dist/assets | head -n 10 | tee -a "$LOG_FILE"
     else
         log "✗ Dist folder not found after build"
         exit 1
@@ -65,29 +67,33 @@ else
 fi
 
 # Rebuild Docker container
-log "Rebuilding Docker container (with --no-cache)..."
+log "Rebuilding Docker container..."
 cd /home/media-stack || exit 1
 
-# Force rebuild without cache to ensure new files are included
+# Stop existing container first
+log "Stopping existing container..."
+docker compose stop mediahub >> "$LOG_FILE" 2>&1 || true
+
+# Build with no-cache to ensure fresh build
+log "Building image with --no-cache..."
 if docker compose build --no-cache mediahub >> "$LOG_FILE" 2>&1; then
-    log "✓ Docker image rebuilt successfully"
+    log "✓ Docker image built successfully"
 else
-    log "✗ Docker image rebuild failed"
+    log "✗ Docker build failed"
     exit 1
 fi
 
-# Restart container
-log "Restarting container..."
-if docker compose up -d mediahub >> "$LOG_FILE" 2>&1; then
-    log "✓ Container restarted successfully"
+# Start with force-recreate to ensure new container
+if docker compose up -d --force-recreate mediahub >> "$LOG_FILE" 2>&1; then
+    log "✓ Container started successfully"
 else
-    log "✗ Container restart failed"
+    log "✗ Container start failed"
     exit 1
 fi
 
 # Wait for container to be healthy
 log "Waiting for container to be healthy..."
-sleep 5
+sleep 8
 
 # Verify container is running
 if docker ps | grep -q mediahub; then
@@ -99,10 +105,17 @@ else
     exit 1
 fi
 
+# Verify deployed version
+log "Verifying deployed version..."
+sleep 2
+VERSION_RESPONSE=$(curl -s http://localhost:81/api/version 2>/dev/null || echo "FAILED")
+log "  Version API Response: $VERSION_RESPONSE"
+
 log "=========================================="
 log "Deployment Complete Successfully!"
 log "=========================================="
 log "Next steps:"
 log "1. Verify application at: https://media.broikiservices.com"
-log "2. Check container logs: docker logs $CONTAINER_ID"
+log "2. Check version: curl https://media.broikiservices.com/api/version"
 log "3. Monitor health: docker ps"
+

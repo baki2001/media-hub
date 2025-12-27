@@ -1,0 +1,253 @@
+################ # NETWORKS # ################
+networks:
+  media:
+    driver: bridge
+################ # SERVICES # ################
+services:
+  # --- SABnzbd (Usenet Downloader) ---
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    networks: [media]
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/media-stack/config/sabnzbd:/config                  # NVMe (Config)
+      - /home/media-stack/tmp/sabnzbd_incomplete:/incomplete      # NVMe (Temp/Incomplete)
+      - /media/jellyfin/torrents:/downloads                       # HDD  (Completed)
+    ports:
+      - "8083:8080"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    blkio_config:
+      weight: 200                                                 # Lower IO Priority
+  # --- Prowlarr (Indexer Manager) ---
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    networks: [media]
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/media-stack/config/prowlarr:/config                 # NVMe (Config)
+    ports:
+      - "9696:9696"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- Radarr (Movie Manager) ---
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    networks: [media]
+    depends_on: [prowlarr]
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/media-stack/config/radarr:/config                   # NVMe (Config)
+      - /media/jellyfin/movies:/movies                            # HDD  (Media)
+      - /media/jellyfin/torrents:/downloads                       # HDD  (Downloads)
+    ports:
+      - "7878:7878"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- Sonarr (Series Manager) ---
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    networks: [media]
+    depends_on: [prowlarr]
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/media-stack/config/sonarr:/config                   # NVMe (Config)
+      - /media/jellyfin/series:/tv                                # HDD  (Media)
+      - /media/jellyfin/torrents:/downloads                       # HDD  (Downloads)
+      - /media/jellyfin/anime:/anime                              # HDD  (Media)
+    ports:
+      - "8989:8989"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- Bazarr (Subtitle Manager) ---
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    networks: [media]
+    depends_on: [sonarr, radarr]
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/media-stack/config/bazarr:/config                   # NVMe (Config)
+      - /media/jellyfin/movies:/movies                            # HDD  (Media - Must match Radarr)
+      - /media/jellyfin/series:/tv                                # HDD  (Media - Must match Sonarr)
+    ports:
+      - "6767:6767"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- Jellyfin (Media Server) ---
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    networks: [media]
+    devices:
+      - /dev/dri:/dev/dri                                         # Hardware Acceleration
+    group_add: ["44","109"]                                       # Groups: video, render
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - JELLYFIN_CACHE_DIR=/cache
+    volumes:
+      - /home/media-stack/config/jellyfin:/config                 # NVMe (Config)
+      - /home/media-stack/cache/jellyfin:/cache                   # NVMe (Cache)
+      - /media/jellyfin:/media                                    # HDD  (Media Library)
+    ports:
+      - "8096:8096"                                               # WebUI
+      - "8920:8920"                                               # HTTPS
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"             # Auto-update Disabled
+    blkio_config:
+      weight: 900                                                 # Higher IO Priority
+  # --- Jellyseerr (Request Manager) ---
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    networks: [media]
+    depends_on: [jellyfin]
+    environment:
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/media-stack/config/jellyseerr:/app/config           # NVMe (Config)
+    ports:
+      - "5055:5055"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- FileFlows (Transcoding Automation) ---
+  fileflows:
+    image: revenz/fileflows:latest
+    container_name: fileflows
+    networks: [media]
+    restart: unless-stopped
+    environment:
+      - LIBVA_DRIVER_NAME=radeonsi
+      - TZ=Europe/Amsterdam
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - "19200:5000"                                              # WebUI
+    devices:
+      - /dev/dri:/dev/dri                                         # Hardware Acceleration
+    group_add: ["44","109"]                                       # Groups: video, render
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro              # Docker Socket Access
+      - /home/media-stack/config/fileflows:/app/Data              # NVMe (Config/DB)
+      - /home/media-stack/logs/fileflows:/app/Logs                # NVMe (Logs)
+      - /home/media-stack/fileflows_temp:/temp                    # NVMe (Transcode Temp)
+      - /media/jellyfin:/media                                    # HDD  (Media Source)
+      - /media/jellyfin/torrents:/downloads                       # HDD  (Downloads Source)
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- Jellystat DB (Postgres) ---
+  jellystat-db:
+    image: postgres:15.2
+    container_name: jellystat-db
+    networks: [media]
+    environment:
+      - POSTGRES_DB=jfstat
+      - POSTGRES_USER=jellystat
+      - POSTGRES_PASSWORD=CHANGE_ME_STRONG
+    volumes:
+      - /home/media-stack/config/jellystat/postgres:/var/lib/postgresql/data # NVMe (Data)
+    shm_size: 1gb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"             # Pin DB Version
+  # --- Jellystat (Statistics) ---
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    networks: [media]
+    depends_on:
+      jellystat-db:
+        condition: service_healthy
+    environment:
+      - TZ=Europe/Amsterdam
+      - POSTGRES_USER=jellystat
+      - POSTGRES_PASSWORD=CHANGE_ME_STRONG
+      - POSTGRES_IP=jellystat-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=jfstat
+      - JWT_SECRET=b4c823d9f1e6a7035c8921fab45de67890123456789abcdef012345bcda
+    ports:
+      - "3000:3000"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- Watchtower (Auto-Updater) ---
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock                 # Docker Socket Access
+    environment:
+      - TZ=Europe/Amsterdam
+      - WATCHTOWER_LABEL_ENABLE=true                              # Update only labeled containers
+      - WATCHTOWER_CLEANUP=true                                   # Cleanup old images
+      - WATCHTOWER_SCHEDULE=0 0 4 * * *                           # Schedule: Daily @ 04:00
+    restart: unless-stopped
+  # --- Wizarr (Invite Manager) ---
+  wizarr:
+    image: ghcr.io/wizarrrr/wizarr:latest
+    container_name: wizarr
+    networks: [media]
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - APP_URL=http://localhost:5690
+    volumes:
+      - /home/media-stack/config/wizarr:/data/database            # NVMe (DB/Config)
+    ports:
+      - "5690:5690"                                               # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  # --- MediaHub (Dashboard) ---
+  mediahub:
+    build: ./media-hub
+    container_name: mediahub
+    networks: [media]
+    user: root
+    environment:
+      - TZ=Europe/Amsterdam
+      - NODE_ENV=production
+      - JWT_SECRET=b4c823d9f1e6a7035c8921fab45de67890123456789abcdef012345bcda
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock                 # Docker Socket Access
+      - /home/media-stack/config/mediahub:/data                   # NVMe (SQLite DB)
+    ports:
+      - "81:3000"                                                 # WebUI
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"

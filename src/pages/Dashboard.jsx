@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { RadarrService, SonarrService, JellyseerrService } from '../services/media'
 import { SabnzbdService } from '../services/sabnzbd'
 import { Film, Tv, DownloadCloud, AlertTriangle, CheckCircle, MessageSquare, AlertCircle } from 'lucide-react'
+import { Button } from '../components/ui'
 import styles from './Dashboard.module.css'
 
 const StatCard = ({ label, value, icon: Icon, color, subtext }) => (
@@ -105,7 +106,7 @@ const Dashboard = () => {
                                             <div className="text-sm text-gray-400">{req.status === 2 ? 'Approved' : req.status === 3 ? 'Declined' : 'Pending'}</div>
                                         </div>
                                         <div className={`px-3 py-1 rounded-full text-xs ${req.status === 2 ? 'bg-green-500/20 text-green-400' :
-                                                req.status === 3 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+                                            req.status === 3 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
                                             }`}>
                                             {req.status === 2 ? 'Available' : req.status === 3 ? 'Declined' : 'Processing'}
                                         </div>
@@ -129,9 +130,9 @@ const Dashboard = () => {
                             <p className="text-sm text-gray-400 mb-4">
                                 Having trouble with playback or subtitles? Let the admin know.
                             </p>
-                            <button className="btn-primary w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20">
+                            <Button variant="danger" className="w-full">
                                 Report Broken Media
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

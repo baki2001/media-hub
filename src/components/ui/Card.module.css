@@ -1,0 +1,37 @@
+.card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+/* Replicate old .glass-card feel if needed via a prop or default? 
+   Let's stick to the tokens. The previous .glass-card used bg-surface anyway. */
+
+.header {
+    padding: var(--space-6) var(--space-6) var(--space-2) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.content {
+    padding: var(--space-6);
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    padding: var(--space-6);
+    background-color: var(--bg-surface-active);
+    border-top: 1px solid var(--border-subtle);
+}

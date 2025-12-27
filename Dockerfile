@@ -16,6 +16,7 @@ RUN npm install --omit=dev
 
 # Copy pre-built frontend (built locally before docker build)
 COPY dist ./dist
+RUN echo "--- BUILDING DEBUG ---" && ls -la dist && echo "--- END DEBUG ---"
 
 # Copy server files
 COPY server ./server
@@ -41,4 +42,3 @@ RUN chown -R node:node /app
 USER node
 
 CMD ["node", "server/index.js"]
-

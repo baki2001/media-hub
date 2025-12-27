@@ -19,157 +19,136 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Colors for output - Define these FIRST before using them
-function Write-Success { 
-    param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green 
-}
-
-function Write-Error { 
-    param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red 
-}
-
-function Write-Info { 
-    param([string]$Message)
-    Write-Host "ℹ $Message" -ForegroundColor Cyan 
-}
-
-function Write-Step { 
-    param([string]$Message)
-    Write-Host "`n==> $Message" -ForegroundColor Yellow 
-}
-
 Write-Host "`n=========================================="
 Write-Host "MediaHub Production Deployment"
 Write-Host "=========================================="
-Write-Info "Server: $ServerUser@$ServerIP"
-Write-Info "Target: $ProjectPath"
+Write-Host "INFO: Server: $ServerUser@$ServerIP" -ForegroundColor Cyan
+Write-Host "INFO: Target: $ProjectPath" -ForegroundColor Cyan
 Write-Host "==========================================`n"
 
 # Get local project directory
 $LocalProjectPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-Write-Info "Local project: $LocalProjectPath"
+Write-Host "INFO: Local project: $LocalProjectPath" -ForegroundColor Cyan
 
 # Step 1: Sync source files
 if (-not $SkipSync) {
-    Write-Step "Step 1: Synchronizing source files to production server"
+    Write-Host "`n==> Step 1: Synchronizing source files to production server" -ForegroundColor Yellow
     
     # Sync src folder
-    Write-Info "Syncing src/ folder..."
+    Write-Host "INFO: Syncing src/ folder..." -ForegroundColor Cyan
     $srcPath = Join-Path $LocalProjectPath "src"
     scp -r -o StrictHostKeyChecking=no "$srcPath" "${ServerUser}@${ServerIP}:${ProjectPath}/"
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "src/ folder synced"
+        Write-Host "SUCCESS: src/ folder synced" -ForegroundColor Green
     }
     else {
-        Write-Error "Failed to sync src/ folder"
+        Write-Host "ERROR: Failed to sync src/ folder" -ForegroundColor Red
         exit 1
     }
     
     # Sync server folder
-    Write-Info "Syncing server/ folder..."
+    Write-Host "INFO: Syncing server/ folder..." -ForegroundColor Cyan
     $serverPath = Join-Path $LocalProjectPath "server"
     scp -r -o StrictHostKeyChecking=no "$serverPath" "${ServerUser}@${ServerIP}:${ProjectPath}/"
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "server/ folder synced"
+        Write-Host "SUCCESS: server/ folder synced" -ForegroundColor Green
     }
     else {
-        Write-Error "Failed to sync server/ folder"
+        Write-Host "ERROR: Failed to sync server/ folder" -ForegroundColor Red
         exit 1
     }
     
     # Sync package.json
-    Write-Info "Syncing package.json..."
+    Write-Host "INFO: Syncing package.json..." -ForegroundColor Cyan
     $packageJson = Join-Path $LocalProjectPath "package.json"
     scp -o StrictHostKeyChecking=no "$packageJson" "${ServerUser}@${ServerIP}:${ProjectPath}/"
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "package.json synced"
+        Write-Host "SUCCESS: package.json synced" -ForegroundColor Green
     }
     else {
-        Write-Error "Failed to sync package.json"
+        Write-Host "ERROR: Failed to sync package.json" -ForegroundColor Red
         exit 1
     }
     
     # Sync Dockerfile
-    Write-Info "Syncing Dockerfile..."
+    Write-Host "INFO: Syncing Dockerfile..." -ForegroundColor Cyan
     $dockerfile = Join-Path $LocalProjectPath "Dockerfile"
     scp -o StrictHostKeyChecking=no "$dockerfile" "${ServerUser}@${ServerIP}:${ProjectPath}/"
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "Dockerfile synced"
+        Write-Host "SUCCESS: Dockerfile synced" -ForegroundColor Green
     }
     else {
-        Write-Error "Failed to sync Dockerfile"
+        Write-Host "ERROR: Failed to sync Dockerfile" -ForegroundColor Red
         exit 1
     }
     
-    Write-Success "All source files synchronized successfully"
+    Write-Host "SUCCESS: All source files synchronized successfully" -ForegroundColor Green
 }
 else {
-    Write-Info "Skipping file synchronization (--SkipSync flag set)"
+    Write-Host "INFO: Skipping file synchronization (--SkipSync flag set)" -ForegroundColor Cyan
 }
 
 # Step 2: Upload deployment script
-Write-Step "Step 2: Uploading deployment script"
+Write-Host "`n==> Step 2: Uploading deployment script" -ForegroundColor Yellow
 $deployScript = Join-Path $LocalProjectPath "deploy.sh"
 scp -o StrictHostKeyChecking=no "$deployScript" "${ServerUser}@${ServerIP}:/root/deploy.sh"
 if ($LASTEXITCODE -eq 0) {
-    Write-Success "Deployment script uploaded"
+    Write-Host "SUCCESS: Deployment script uploaded" -ForegroundColor Green
 }
 else {
-    Write-Error "Failed to upload deployment script"
+    Write-Host "ERROR: Failed to upload deployment script" -ForegroundColor Red
     exit 1
 }
 
 # Step 3: Execute deployment
-Write-Step "Step 3: Executing remote deployment"
-Write-Info "This may take several minutes..."
-Write-Info "The deployment script will:"
-Write-Info "  1. Clean previous build artifacts"
-Write-Info "  2. Install dependencies"
-Write-Info "  3. Build frontend"
-Write-Info "  4. Rebuild Docker container"
-Write-Info "  5. Restart application"
+Write-Host "`n==> Step 3: Executing remote deployment" -ForegroundColor Yellow
+Write-Host "INFO: This may take several minutes..." -ForegroundColor Cyan
+Write-Host "INFO: The deployment script will:" -ForegroundColor Cyan
+Write-Host "INFO:   1. Clean previous build artifacts" -ForegroundColor Cyan
+Write-Host "INFO:   2. Install dependencies" -ForegroundColor Cyan
+Write-Host "INFO:   3. Build frontend" -ForegroundColor Cyan
+Write-Host "INFO:   4. Rebuild Docker container" -ForegroundColor Cyan
+Write-Host "INFO:   5. Restart application" -ForegroundColor Cyan
 Write-Host ""
 
 # Execute deployment and capture output
-ssh -o StrictHostKeyChecking=no "${ServerUser}@${ServerIP}" "bash /root/deploy.sh"
+ssh -o StrictHostKeyChecking=no "${ServerUser}@${ServerIP}" "sed -i 's/\r$//' /root/deploy.sh && bash /root/deploy.sh"
 $deployExitCode = $LASTEXITCODE
 
 # Step 4: Fetch and display deployment log
-Write-Step "Step 4: Deployment log"
+Write-Host "`n==> Step 4: Deployment log" -ForegroundColor Yellow
 ssh -o StrictHostKeyChecking=no "${ServerUser}@${ServerIP}" "cat /root/deploy_log.txt"
 
 # Step 5: Verify deployment
-Write-Step "Step 5: Verifying deployment"
+Write-Host "`n==> Step 5: Verifying deployment" -ForegroundColor Yellow
 
 if ($deployExitCode -eq 0) {
-    Write-Success "Deployment completed successfully!"
+    Write-Host "SUCCESS: Deployment completed successfully!" -ForegroundColor Green
     
     # Verify container is running
-    Write-Info "Checking container status..."
+    Write-Host "INFO: Checking container status..." -ForegroundColor Cyan
     $containerStatus = ssh -o StrictHostKeyChecking=no "${ServerUser}@${ServerIP}" "docker ps --filter 'name=mediahub' --format '{{.Status}}'"
     
     if ($containerStatus -match "Up") {
-        Write-Success "Container is running: $containerStatus"
+        Write-Host "SUCCESS: Container is running: $containerStatus" -ForegroundColor Green
     }
     else {
-        Write-Error "Container status: $containerStatus"
+        Write-Host "ERROR: Container status: $containerStatus" -ForegroundColor Red
     }
     
     Write-Host "`n=========================================="
     Write-Host "Deployment Complete!" -ForegroundColor Green
     Write-Host "=========================================="
-    Write-Info "Application URL: https://media.broikiservices.com"
-    Write-Info "Next steps:"
-    Write-Info "  1. Test the application in your browser"
-    Write-Info "  2. Verify all features are working correctly"
-    Write-Info "  3. Monitor logs: ssh $ServerUser@$ServerIP 'docker logs -f mediahub'"
+    Write-Host "INFO: Application URL: https://media.broikiservices.com" -ForegroundColor Cyan
+    Write-Host "INFO: Next steps:" -ForegroundColor Cyan
+    Write-Host "INFO:   1. Test the application in your browser" -ForegroundColor Cyan
+    Write-Host "INFO:   2. Verify all features are working correctly" -ForegroundColor Cyan
+    Write-Host "INFO:   3. Monitor logs: ssh $ServerUser@$ServerIP 'docker logs -f mediahub'" -ForegroundColor Cyan
     Write-Host "==========================================`n"
 }
 else {
-    Write-Error "Deployment failed with exit code: $deployExitCode"
-    Write-Info "Check the deployment log above for details"
-    Write-Info "To view full logs: ssh $ServerUser@$ServerIP 'cat /root/deploy_log.txt'"
+    Write-Host "ERROR: Deployment failed with exit code: $deployExitCode" -ForegroundColor Red
+    Write-Host "INFO: Check the deployment log above for details" -ForegroundColor Cyan
+    Write-Host "INFO: To view full logs: ssh $ServerUser@$ServerIP 'cat /root/deploy_log.txt'" -ForegroundColor Cyan
     exit 1
 }

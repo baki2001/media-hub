@@ -25,12 +25,15 @@ The easiest and most reliable way to deploy:
 .\deploy.ps1
 ```
 
+> **SSH Password Handling**: The deployment script requires entering the SSH password (`BCy1317!`) multiple times during execution (for each scp/ssh command). If running interactively, enter the password when prompted. For automation, consider setting up SSH key-based authentication.
+
 This automated script will:
 - ✓ Sync all source files (src, server, package.json, Dockerfile)
 - ✓ Upload deployment script
 - ✓ Execute remote deployment with verification
-- ✓ Monitor progress in real-time
-- ✓ Verify deployment success
+- ✓ Build with `--no-cache` to ensure fresh Docker image
+- ✓ Verify container is running
+- ✓ Call `/api/version` to confirm deployed version
 
 **Parameters:**
 ```powershell
@@ -88,7 +91,17 @@ The deployment script will:
 
 ### Step 4: Verify Deployment
 
+**Quick verification using script:**
 ```powershell
+// turbo
+.\verify-deployment.ps1
+```
+
+**Manual verification:**
+```powershell
+# Check deployed version (should match local package.json)
+Invoke-WebRequest -Uri "https://media.broikiservices.com/api/version" -UseBasicParsing | Select-Object -ExpandProperty Content
+
 # Check deployment log
 ssh root@192.168.178.23 "cat /root/deploy_log.txt"
 
@@ -103,8 +116,38 @@ ssh root@192.168.178.23 "docker logs --tail 50 mediahub"
 
 1. Open browser to: https://media.broikiservices.com
 2. Hard refresh: `Ctrl+Shift+R` to clear browser cache
-3. Test critical functionality
-4. Check browser console for errors
+3. Check Settings page → version should match local package.json
+4. Test critical functionality
+5. Check browser console for errors
+
+## Deployment Verification Checklist
+
+Run this checklist after every deployment:
+
+- [ ] `.\verify-deployment.ps1` shows version match
+- [ ] Settings page shows correct version
+- [ ] No console errors in browser DevTools
+- [ ] Login/logout works correctly
+- [ ] Dashboard loads with data
+- [ ] At least one other feature tested (Library, Search, etc.)
+
+## Cloudflare Cache
+
+The site is behind Cloudflare which may cache responses. If changes don't appear:
+
+1. **Purge cache** (recommended):
+   - Log into Cloudflare dashboard
+   - Select the domain
+   - Go to Caching → Configuration
+   - Click "Purge Everything"
+
+2. **Development Mode** (for testing):
+   - Go to Caching → Configuration
+   - Enable "Development Mode" (disables caching for 3 hours)
+
+3. **Page Rules** (permanent fix):
+   - Create rule for `media.broikiservices.com/*.html`
+   - Set Cache Level: Bypass
 
 ## Troubleshooting
 
@@ -130,6 +173,13 @@ ssh root@192.168.178.23 "docker logs -f mediahub"
 
 ### Common Issues
 
+**Issue**: Version mismatch after deployment
+**Cause**: Docker build cache or Cloudflare cache
+**Solution**:
+1. Check deployment log for errors
+2. Purge Cloudflare cache
+3. Hard refresh browser (`Ctrl+Shift+R`)
+
 **Issue**: Changes not reflected in browser
 **Solution**: Hard refresh browser with `Ctrl+Shift+R` or clear browser cache
 
@@ -148,3 +198,39 @@ For comprehensive deployment documentation, see:
 - [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
 - [deploy.ps1](../deploy.ps1) - PowerShell deployment script
 - [deploy.sh](../deploy.sh) - Server-side deployment script
+- [verify-deployment.ps1](../verify-deployment.ps1) - Deployment verification script
+
+## Technical Reference
+
+Key architecture details for troubleshooting:
+
+### API Endpoints
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/api/version` | Returns `{version, buildTime, environment}` - use to verify deployment |
+| `/api/health` | Health check returning `{status: "ok", timestamp}` |
+
+### Docker Architecture
+
+- **docker-compose.yml location**: `/home/media-stack/docker-compose.yml`
+- **MediaHub service**: Built from `./media-hub` directory (not pulled from registry)
+- **Build process**: `deploy.sh` runs npm build on server, then `docker compose build --no-cache`
+- **Container name**: `mediahub`
+- **Port mapping**: `81:3000`
+- **Data volume**: `/home/media-stack/config/mediahub:/data` (SQLite database)
+
+### Caching Behavior
+
+- **index.html**: Served with `Cache-Control: no-store, no-cache` + `Surrogate-Control: no-store`
+- **Hashed assets** (`/assets/*.js|css`): `immutable, max-age=1y` (fingerprinted filenames)
+- **Cloudflare**: May cache unless purged - check CF-RAY header for cache status
+
+### File Sync Requirements
+
+When deploying, these files MUST be synced to the server:
+- `src/` - Frontend source code
+- `server/` - Backend Express server
+- `package.json` - Dependencies
+- `Dockerfile` - Build configuration
+- `deploy.sh` - Server-side deployment script
