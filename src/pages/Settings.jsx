@@ -9,7 +9,11 @@ import {
     Settings as SettingsIcon, Search, Subtitles, Inbox, ChevronLeft, Loader, CheckCircle, XCircle, BarChart, Trash, Plus, RefreshCw,
     Moon, Sun, Monitor, Upload, FileDown
 } from 'lucide-react'
-import { Button, Skeleton } from '../components/Common'
+import { Skeleton } from '../components/Common'
+import Button from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
+import Toggle from '../components/ui/Toggle'
 import styles from './Settings.module.css'
 import { VERSION, BUILD_ID, CHANGELOG } from '../data/changelog'
 
@@ -90,6 +94,16 @@ const Settings = () => {
     const [tempKey, setTempKey] = useState('')
     const [testStatus, setTestStatus] = useState(null)
     const [customColor, setCustomColor] = useState('#0d9488')
+    const [serverVersion, setServerVersion] = useState(null)
+
+    React.useEffect(() => {
+        if (activeTab === 'about') {
+            fetch('/api/version')
+                .then(res => res.json())
+                .then(data => setServerVersion(data))
+                .catch(err => console.error('Failed to fetch server version:', err))
+        }
+    }, [activeTab])
 
     const handleEdit = (service) => {
         setEditingService(service)
@@ -219,14 +233,15 @@ const Settings = () => {
                     {visibleTabs.map(tab => {
                         const Icon = tab.icon
                         return (
-                            <button
+                            <Button
                                 key={tab.id}
+                                variant="ghost"
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`${styles.navItem} ${activeTab === tab.id ? styles.active : ''}`}
+                                leftIcon={<Icon size={18} />}
                             >
-                                <Icon size={18} />
-                                <span>{tab.label}</span>
-                            </button>
+                                {tab.label}
+                            </Button>
                         )
                     })}
                 </nav>
@@ -243,15 +258,23 @@ const Settings = () => {
                                 <p className={styles.contentSubtitle}>Configure your media stack services.</p>
                             </div>
                             <div className={styles.headerActions}>
-                                <button className={styles.actionBtn} onClick={handleExport} title="Export Configuration">
-                                    <FileDown size={18} />
-                                    <span>Export</span>
-                                </button>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleExport}
+                                    title="Export Configuration"
+                                    leftIcon={<FileDown size={18} />}
+                                >
+                                    Export
+                                </Button>
                                 <div className={styles.uploadWrapper}>
-                                    <label htmlFor="import-config" className={styles.actionBtn} title="Import Configuration">
-                                        <Upload size={18} />
-                                        <span>Import</span>
-                                    </label>
+                                    <Button
+                                        variant="outline"
+                                        title="Import Configuration"
+                                        leftIcon={<Upload size={18} />}
+                                        onClick={() => document.getElementById('import-config').click()}
+                                    >
+                                        Import
+                                    </Button>
                                     <input
                                         id="import-config"
                                         type="file"
@@ -268,8 +291,9 @@ const Settings = () => {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    icon={ChevronLeft}
+                                    leftIcon={<ChevronLeft size={16} />}
                                     onClick={() => { setEditingService(null); setTestStatus(null); }}
+                                    className={styles.backBtn}
                                 >
                                     Back
                                 </Button>
@@ -277,9 +301,7 @@ const Settings = () => {
 
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>Server URL</label>
-                                    <input
-                                        type="text"
-                                        className={styles.input}
+                                    <Input
                                         value={tempUrl}
                                         onChange={(e) => setTempUrl(e.target.value)}
                                         placeholder="http://192.168.1.x:7878"
@@ -288,9 +310,7 @@ const Settings = () => {
 
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>API Key</label>
-                                    <input
-                                        type="text"
-                                        className={styles.input}
+                                    <Input
                                         value={tempKey}
                                         onChange={(e) => setTempKey(e.target.value)}
                                         placeholder="Your API key"
@@ -299,18 +319,18 @@ const Settings = () => {
 
                                 <div className={styles.formActions}>
                                     <Button
-                                        variant="ghost"
+                                        variant="outline"
                                         onClick={handleTest}
-                                        loading={testStatus === 'testing'}
+                                        isLoading={testStatus === 'testing'}
                                         disabled={testStatus === 'testing'}
-                                        icon={testStatus === 'success' ? CheckCircle : testStatus === 'error' ? XCircle : null}
+                                        leftIcon={testStatus === 'success' ? <CheckCircle size={16} /> : testStatus === 'error' ? <XCircle size={16} /> : null}
                                     >
                                         {!testStatus && 'Test Connection'}
                                         {testStatus === 'testing' && 'Testing...'}
                                         {testStatus === 'success' && 'Connected!'}
                                         {testStatus === 'error' && 'Failed'}
                                     </Button>
-                                    <Button variant="primary" icon={Save} onClick={handleSave}>
+                                    <Button variant="primary" leftIcon={<Save size={16} />} onClick={handleSave}>
                                         Save
                                     </Button>
                                     <Button variant="ghost" onClick={() => { setEditingService(null); setTestStatus(null); }}>
@@ -324,7 +344,7 @@ const Settings = () => {
                                     const Icon = service.icon
                                     const isConfigured = !!settings?.[service.key]?.url
                                     return (
-                                        <div key={service.key} className={styles.serviceCard}>
+                                        <Card key={service.key} className={`${styles.serviceCard} ${isConfigured ? styles.configuredCard : ''}`}>
                                             <div className={`${styles.serviceIcon} ${isConfigured ? styles.configured : ''}`}>
                                                 <Icon size={22} />
                                             </div>
@@ -339,9 +359,10 @@ const Settings = () => {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        icon={Power}
+                                                        leftIcon={<Power size={16} />}
                                                         onClick={() => handleRestart(service.key)}
                                                         title="Restart"
+                                                        className={styles.restartBtn}
                                                     />
                                                 )}
                                                 <Button
@@ -352,7 +373,7 @@ const Settings = () => {
                                                     Configure
                                                 </Button>
                                             </div>
-                                        </div>
+                                        </Card>
                                     )
                                 })}
                             </div>
@@ -378,14 +399,14 @@ const Settings = () => {
                                     const Icon = mode.icon
                                     const isActive = (settings.appearance?.themeMode || 'dark') === mode.id
                                     return (
-                                        <button
+                                        <Card
                                             key={mode.id}
                                             className={`${styles.modeCard} ${isActive ? styles.modeCardActive : ''}`}
                                             onClick={() => changeThemeMode(mode.id)}
                                         >
                                             <Icon size={24} />
                                             <span>{mode.label}</span>
-                                        </button>
+                                        </Card>
                                     )
                                 })}
                             </div>
@@ -424,7 +445,7 @@ const Settings = () => {
                             <p className={styles.sectionDesc}>Choose a preset theme or create your own.</p>
                             <div className={styles.themeGrid}>
                                 {PRESET_COLORS.map(preset => (
-                                    <button
+                                    <Card
                                         key={preset.name}
                                         className={`${styles.themeCard} ${customColor === preset.color ? styles.themeCardActive : ''}`}
                                         onClick={() => changeTheme(preset.color)}
@@ -432,7 +453,7 @@ const Settings = () => {
                                         <div className={styles.themeCardSwatch} style={{ backgroundColor: preset.color }} />
                                         <span className={styles.themeCardName}>{preset.name}</span>
                                         {customColor === preset.color && <CheckCircle size={14} className={styles.themeCheck} />}
-                                    </button>
+                                    </Card>
                                 ))}
                             </div>
 
@@ -443,13 +464,13 @@ const Settings = () => {
                                     <span>Custom Color</span>
                                 </div>
                                 <div className={styles.customThemeInputs}>
-                                    <input
+                                    <Input
                                         type="color"
                                         className={styles.colorPickerSmall}
                                         value={customColor}
                                         onChange={(e) => changeTheme(e.target.value)}
                                     />
-                                    <input
+                                    <Input
                                         type="text"
                                         className={styles.hexInputSmall}
                                         value={customColor}
@@ -481,12 +502,10 @@ const Settings = () => {
                                     {NAV_ITEMS.filter(item => ['library', 'activity', 'search'].includes(item.key)).map(item => (
                                         <div key={item.key} className={styles.navToggleItem}>
                                             <span>{item.label}</span>
-                                            <button
-                                                className={`${styles.toggle} ${settings.navVisibility?.[item.key] !== false ? styles.toggleOn : ''}`}
-                                                onClick={() => toggleNavItem(item.key)}
-                                            >
-                                                <span className={styles.toggleKnob} />
-                                            </button>
+                                            <Toggle
+                                                checked={settings.navVisibility?.[item.key] !== false}
+                                                onChange={() => toggleNavItem(item.key)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -497,12 +516,10 @@ const Settings = () => {
                                     {NAV_ITEMS.filter(item => ['downloads', 'requests', 'massEdit', 'manualImport'].includes(item.key)).map(item => (
                                         <div key={item.key} className={styles.navToggleItem}>
                                             <span>{item.label}</span>
-                                            <button
-                                                className={`${styles.toggle} ${settings.navVisibility?.[item.key] !== false ? styles.toggleOn : ''}`}
-                                                onClick={() => toggleNavItem(item.key)}
-                                            >
-                                                <span className={styles.toggleKnob} />
-                                            </button>
+                                            <Toggle
+                                                checked={settings.navVisibility?.[item.key] !== false}
+                                                onChange={() => toggleNavItem(item.key)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -513,12 +530,10 @@ const Settings = () => {
                                     {NAV_ITEMS.filter(item => ['indexers', 'subtitles', 'jobs', 'stats'].includes(item.key)).map(item => (
                                         <div key={item.key} className={styles.navToggleItem}>
                                             <span>{item.label}</span>
-                                            <button
-                                                className={`${styles.toggle} ${settings.navVisibility?.[item.key] !== false ? styles.toggleOn : ''}`}
-                                                onClick={() => toggleNavItem(item.key)}
-                                            >
-                                                <span className={styles.toggleKnob} />
-                                            </button>
+                                            <Toggle
+                                                checked={settings.navVisibility?.[item.key] !== false}
+                                                onChange={() => toggleNavItem(item.key)}
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -543,22 +558,26 @@ const Settings = () => {
                                 <Info size={18} /> Version Information
                             </h3>
                             <div className={styles.aboutGrid}>
-                                <div className={styles.aboutCard}>
-                                    <span className={styles.aboutLabel}>Version</span>
+                                <Card className={styles.aboutCard}>
+                                    <span className={styles.aboutLabel}>App Version</span>
                                     <span className={styles.aboutValue}>v{VERSION}</span>
-                                </div>
-                                <div className={styles.aboutCard}>
-                                    <span className={styles.aboutLabel}>Build ID</span>
-                                    <span className={styles.aboutValue} style={{ fontFamily: 'monospace', fontSize: 'var(--font-size-sm)' }}>{BUILD_ID}</span>
-                                </div>
-                                <div className={styles.aboutCard}>
+                                </Card>
+                                <Card className={styles.aboutCard}>
+                                    <span className={styles.aboutLabel}>Server Version</span>
+                                    <span className={styles.aboutValue}>
+                                        {serverVersion?.version ? `v${serverVersion.version}` : '...'}
+                                    </span>
+                                </Card>
+                                <Card className={styles.aboutCard}>
+                                    <span className={styles.aboutLabel}>Build Date</span>
+                                    <span className={styles.aboutValue} style={{ fontFamily: 'monospace', fontSize: 'var(--font-size-sm)' }}>
+                                        {serverVersion?.buildTime ? new Date(serverVersion.buildTime).toLocaleDateString() : BUILD_ID}
+                                    </span>
+                                </Card>
+                                <Card className={styles.aboutCard}>
                                     <span className={styles.aboutLabel}>Environment</span>
                                     <span className={styles.aboutValue}>{import.meta.env.MODE}</span>
-                                </div>
-                                <div className={styles.aboutCard}>
-                                    <span className={styles.aboutLabel}>React</span>
-                                    <span className={styles.aboutValue}>v19</span>
-                                </div>
+                                </Card>
                             </div>
                         </section>
 

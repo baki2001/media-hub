@@ -4,6 +4,9 @@ import { useSettings } from '../context/SettingsContext'
 import { useNotification } from '../context/NotificationContext'
 import { ProwlarrService } from '../services/prowlarr'
 import { Search, Radio, CheckCircle, XCircle, ToggleLeft, ToggleRight, RefreshCw, ExternalLink, List } from 'lucide-react'
+import Button from '../components/ui/Button'
+import { Input, SearchInput } from '../components/ui/Input'
+import { Card } from '../components/ui/Card'
 import styles from './Indexers.module.css'
 
 const TABS = [
@@ -90,14 +93,15 @@ const Indexers = () => {
                     {TABS.map(tab => {
                         const Icon = tab.icon
                         return (
-                            <button
+                            <Button
                                 key={tab.id}
+                                variant="ghost"
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`${styles.navItem} ${activeTab === tab.id ? styles.active : ''}`}
+                                leftIcon={<Icon size={18} />}
                             >
-                                <Icon size={18} />
-                                <span>{tab.label}</span>
-                            </button>
+                                {tab.label}
+                            </Button>
                         )
                     })}
                 </nav>
@@ -113,13 +117,13 @@ const Indexers = () => {
                                     {enabledCount} of {indexers?.length || 0} indexers enabled
                                 </p>
                             </div>
-                            <button
-                                className={styles.filterBtn}
+                            <Button
+                                variant="outline"
                                 onClick={() => setShowEnabledOnly(!showEnabledOnly)}
+                                leftIcon={showEnabledOnly ? <ToggleRight size={20} className={styles.on} /> : <ToggleLeft size={20} />}
                             >
-                                {showEnabledOnly ? <ToggleRight size={20} className={styles.on} /> : <ToggleLeft size={20} />}
-                                <span>{showEnabledOnly ? 'Enabled Only' : 'All Indexers'}</span>
-                            </button>
+                                {showEnabledOnly ? 'Enabled Only' : 'All Indexers'}
+                            </Button>
                         </header>
 
                         {isLoading && <div className={styles.loading}>Loading indexers...</div>}
@@ -128,16 +132,17 @@ const Indexers = () => {
                             {displayedIndexers.map(indexer => {
                                 const stat = getStatForIndexer(indexer.id)
                                 return (
-                                    <div key={indexer.id} className={`${styles.indexerCard} ${!indexer.enable ? styles.disabled : ''}`}>
+                                    <Card key={indexer.id} className={`${styles.indexerCard} ${!indexer.enable ? styles.disabled : ''}`}>
                                         <div className={styles.indexerHeader}>
                                             <h3 className={styles.indexerName}>{indexer.name}</h3>
-                                            <button
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 className={styles.toggleBtn}
                                                 onClick={() => toggleMutation.mutate({ indexer, enabled: !indexer.enable })}
                                                 title={indexer.enable ? 'Disable' : 'Enable'}
-                                            >
-                                                {indexer.enable ? <ToggleRight size={24} className={styles.on} /> : <ToggleLeft size={24} />}
-                                            </button>
+                                                leftIcon={indexer.enable ? <ToggleRight size={24} className={styles.on} /> : <ToggleLeft size={24} />}
+                                            />
                                         </div>
 
                                         <div className={styles.indexerStats}>
@@ -165,7 +170,7 @@ const Indexers = () => {
                                                 <span className={`${styles.status} ${styles.inactive}`}><XCircle size={12} /> Disabled</span>
                                             )}
                                         </div>
-                                    </div>
+                                    </Card>
                                 )
                             })}
                         </div>
@@ -184,24 +189,23 @@ const Indexers = () => {
 
                         <div className={styles.searchBox}>
                             <div className={styles.searchInputWrapper}>
-                                <Search size={18} className={styles.searchIcon} />
-                                <input
-                                    type="text"
-                                    className={styles.searchInput}
+                                <SearchInput
                                     placeholder="Search for releases..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    className={styles.searchInput}
                                 />
                             </div>
-                            <button
-                                className={styles.searchBtn}
+                            <Button
+                                variant="primary"
                                 onClick={handleSearch}
                                 disabled={isSearching || !searchQuery.trim()}
+                                isLoading={isSearching}
+                                leftIcon={!isSearching && <Search size={16} />}
                             >
-                                {isSearching ? <RefreshCw size={16} className={styles.spin} /> : <Search size={16} />}
                                 Search
-                            </button>
+                            </Button>
                         </div>
 
                         {searchResults && (
@@ -209,12 +213,12 @@ const Indexers = () => {
                                 <div className={styles.resultsHeader}>
                                     <h3>Results</h3>
                                     <span className={styles.resultCount}>{searchResults.length} found</span>
-                                    <button className={styles.clearBtn} onClick={() => setSearchResults(null)}>Clear</button>
+                                    <Button variant="ghost" size="sm" onClick={() => setSearchResults(null)}>Clear</Button>
                                 </div>
 
                                 <div className={styles.resultsGrid}>
                                     {searchResults.slice(0, 50).map((result, i) => (
-                                        <div key={i} className={styles.resultCard}>
+                                        <Card key={i} className={styles.resultCard}>
                                             <div className={styles.resultInfo}>
                                                 <div className={styles.resultTitle}>{result.title}</div>
                                                 <div className={styles.resultMeta}>
@@ -223,16 +227,17 @@ const Indexers = () => {
                                                 </div>
                                             </div>
                                             {result.downloadUrl && (
-                                                <a
-                                                    href={result.downloadUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className={styles.downloadLink}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    as="a"
+                                                    onClick={() => window.open(result.downloadUrl, '_blank')}
+                                                    leftIcon={<ExternalLink size={14} />}
                                                 >
-                                                    <ExternalLink size={14} /> Download
-                                                </a>
+                                                    Download
+                                                </Button>
                                             )}
-                                        </div>
+                                        </Card>
                                     ))}
                                 </div>
                             </>

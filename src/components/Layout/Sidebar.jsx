@@ -1,7 +1,7 @@
 
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { Library, Search, Download, Settings, Zap, BarChart, FileEdit, Archive, FolderInput, Bell, Radio, Subtitles, Cog, Calendar, LogOut } from 'lucide-react'
+import { Library, Search, Download, Settings, Zap, BarChart, FileEdit, Archive, FolderInput, Bell, Radio, Subtitles, Cog, Calendar, LogOut, LayoutDashboard } from 'lucide-react'
 import { useNotification } from '../../context/NotificationContext'
 import { useSettings } from '../../context/SettingsContext'
 import { useAuth } from '../../context/AuthContext'
@@ -9,14 +9,16 @@ import styles from './Sidebar.module.css'
 
 const Sidebar = () => {
     const { settings } = useSettings()
-    const { logout } = useAuth()
+    const { logout, user } = useAuth()
     const navVisibility = settings.navVisibility || {}
+    const isAdmin = user?.isAdmin
 
     // Grouped logically: Browse / Media / Management / System
     const navGroups = [
         {
             label: null, // Primary nav - no header
             items: [
+                { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', key: 'dashboard', adminOnly: true },
                 { label: 'Library', icon: Library, path: '/library', key: 'library' },
                 { label: 'Search', icon: Search, path: '/search', key: 'search' },
                 { label: 'Calendar', icon: Calendar, path: '/calendar', key: 'calendar' },
@@ -58,7 +60,13 @@ const Sidebar = () => {
 
             <nav className={styles.nav}>
                 {navGroups.map((group, gi) => {
-                    const visibleItems = group.items.filter(item => navVisibility[item.key] !== false)
+                    const visibleItems = group.items.filter(item => {
+                        // Hide if visibility is explicitly set to false
+                        if (navVisibility[item.key] === false) return false
+                        // Hide admin-only items from non-admin users
+                        if (item.adminOnly && !isAdmin) return false
+                        return true
+                    })
                     if (visibleItems.length === 0) return null
                     return (
                         <div key={gi} className={styles.navGroup}>

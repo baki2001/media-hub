@@ -67,6 +67,7 @@
     color: var(--text-muted);
 }
 
+/* Navigation */
 .nav {
     display: flex;
     flex-direction: column;
@@ -74,31 +75,9 @@
 }
 
 .navItem {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    text-align: left;
     width: 100%;
-}
-
-.navItem:hover {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-primary);
-}
-
-.navItem.active {
-    background: rgba(13, 148, 136, 0.1);
-    color: var(--accent);
-    border-color: rgba(13, 148, 136, 0.2);
+    justify-content: flex-start;
+    text-align: left;
 }
 
 .badge {
@@ -116,38 +95,8 @@
 }
 
 .globalBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
     width: 100%;
-    padding: var(--space-3);
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    border: 1px solid;
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.pauseBtn {
-    background: rgba(234, 179, 8, 0.1);
-    color: #eab308;
-    border-color: rgba(234, 179, 8, 0.2);
-}
-
-.pauseBtn:hover {
-    background: rgba(234, 179, 8, 0.2);
-}
-
-.resumeBtn {
-    background: rgba(34, 197, 94, 0.1);
-    color: #22c55e;
-    border-color: rgba(34, 197, 94, 0.2);
-}
-
-.resumeBtn:hover {
-    background: rgba(34, 197, 94, 0.2);
+    justify-content: center;
 }
 
 /* Main Content */
@@ -254,30 +203,12 @@
 }
 
 .itemBtn {
-    background: none;
-    border: none;
-    padding: var(--space-2);
+    /* Style overrides for icon-only buttons if needed, usually Button handles it */
     color: var(--text-muted);
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-base);
 }
 
 .itemBtn:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.itemBtn.pause:hover {
-    color: #eab308;
-}
-
-.itemBtn.resume:hover {
-    color: #22c55e;
-}
-
-.itemBtn.delete:hover {
-    color: var(--danger);
 }
 
 /* History Table */
@@ -351,17 +282,9 @@
     text-align: center;
     color: var(--text-muted);
     gap: var(--space-4);
+    padding: var(--space-8);
 }
 
 .notConfigured h2 {
     color: var(--text-primary);
-}
-
-.configBtn {
-    padding: var(--space-2) var(--space-4);
-    background: var(--accent);
-    color: black;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    text-decoration: none;
 }

@@ -1,0 +1,42 @@
+.toggle {
+    width: 44px;
+    height: 24px;
+    padding: 2px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    /* Align with design system focus ring reqs */
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    outline: none;
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.toggle:focus-visible {
+    box-shadow: 0 0 0 2px var(--bg-color), 0 0 0 4px var(--accent);
+}
+
+.toggle.checked {
+    background-color: var(--accent);
+}
+
+.toggle.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.thumb {
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.2s ease-in-out;
+    transform: translateX(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.toggle.checked .thumb {
+    transform: translateX(20px);
+}

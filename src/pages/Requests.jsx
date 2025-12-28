@@ -40,7 +40,6 @@ const getMediaInfo = (req) => {
 
 const TABS = [
     { id: 'all', label: 'All Requests', icon: Inbox },
-    { id: 'pending', label: 'Pending', icon: Clock },
     { id: 'processing', label: 'Processing', icon: Play },
     { id: 'available', label: 'Available', icon: Check },
 ]
@@ -109,7 +108,6 @@ const Requests = () => {
         // 5: PROCESSING (?) - Actually usually 2 is approved.
 
         switch (activeTab) {
-            case 'pending': return requests.results.filter(r => r.status === 1)
             case 'processing': return requests.results.filter(r => r.status === 2 && !r.media?.hasFile) // Approved but not available?
             case 'available': return requests.results.filter(r => r.media?.status === 5 || r.media?.hasFile) // 5 is Available in Jellyseerr media status
             default: return requests.results

@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import compression from 'compression'
 import rateLimit from 'express-rate-limit'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
@@ -11,6 +12,7 @@ import proxyRouter from './routes/proxy.js'
 import authRouter from './routes/auth.js'
 import publicRouter from './routes/public.js'
 import { cleanupExpiredCache } from './database.js'
+import { requireAuth } from './middleware/auth.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -24,15 +26,38 @@ app.set('trust proxy', 1) // Trust first proxy (Docker/Nginx)
 const PORT = process.env.PORT || 3000
 
 // Middleware
-app.use(cors())
+const corsOptions = process.env.NODE_ENV === 'production'
+    ? { origin: false }  // Same-origin only in production
+    : { origin: true }   // Allow all origins in development
+app.use(cors(corsOptions))
+app.use(compression({
+    level: 6,  // Balance between speed and compression
+    threshold: 1024,  // Only compress responses > 1KB
+    filter: (req, res) => {
+        if (req.headers['x-no-compression']) return false
+        return compression.filter(req, res)
+    }
+}))
 app.use(express.json({ limit: '10mb' }))
 
-// Security headers (production only)
-if (process.env.NODE_ENV === 'production') {
-    app.use(helmet({
-        contentSecurityPolicy: false  // Disable CSP for SPA compatibility
-    }))
-}
+// Security headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],  // Required for Vite/React SPA
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            imgSrc: ["'self'", "data:", "blob:", "https://image.tmdb.org", "https://*.jellyfin.org"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'none'"],
+            upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
+        }
+    },
+    crossOriginEmbedderPolicy: false,  // Required for external images
+    crossOriginResourcePolicy: { policy: 'cross-origin' }  // Allow image loading
+}))
 
 // Rate limiting for auth endpoints
 const authLimiter = rateLimit({
@@ -44,10 +69,10 @@ const authLimiter = rateLimit({
 })
 
 // API Routes
-app.use('/api/settings', settingsRouter)
-app.use('/api/proxy', proxyRouter)
-app.use('/api/auth', authLimiter, authRouter)
-app.use('/api/public', publicRouter)
+app.use('/api/settings', requireAuth, settingsRouter)  // Protected: requires login
+app.use('/api/proxy', requireAuth, proxyRouter)        // Protected: requires login
+app.use('/api/auth', authLimiter, authRouter)          // Public: handles login/logout
+app.use('/api/public', publicRouter)                   // Public: backdrops for login page
 
 // Health check
 app.get('/api/health', (req, res) => {

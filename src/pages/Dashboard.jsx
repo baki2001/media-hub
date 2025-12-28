@@ -5,20 +5,22 @@ import { useAuth } from '../context/AuthContext'
 import { RadarrService, SonarrService, JellyseerrService } from '../services/media'
 import { SabnzbdService } from '../services/sabnzbd'
 import { Film, Tv, DownloadCloud, AlertTriangle, CheckCircle, MessageSquare, AlertCircle } from 'lucide-react'
-import { Button } from '../components/ui'
+import { Button, Card, CardContent } from '../components/ui'
 import styles from './Dashboard.module.css'
 
 const StatCard = ({ label, value, icon: Icon, color, subtext }) => (
-    <div className={`glass-card ${styles.statCard}`}>
-        <div className={styles.iconArea} style={{ color: color }}>
-            <Icon size={24} />
-        </div>
-        <div className={styles.statInfo}>
-            <div className={styles.statValue}>{value}</div>
-            <div className={styles.statLabel}>{label}</div>
-            {subtext && <div className={styles.statSub}>{subtext}</div>}
-        </div>
-    </div>
+    <Card className={styles.statCard}>
+        <CardContent className={styles.statCardContent}>
+            <div className={styles.iconArea} style={{ color: color }}>
+                <Icon size={24} />
+            </div>
+            <div className={styles.statInfo}>
+                <div className={styles.statValue}>{value}</div>
+                <div className={styles.statLabel}>{label}</div>
+                {subtext && <div className={styles.statSub}>{subtext}</div>}
+            </div>
+        </CardContent>
+    </Card>
 )
 
 const Dashboard = () => {
@@ -173,44 +175,48 @@ const Dashboard = () => {
             </div>
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="glass-card p-6">
-                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <AlertTriangle size={20} className="text-yellow-500" /> System Health
-                    </h2>
-                    <div className="space-y-4">
-                        {/* Mock Health Checks for now - real implementation would fetch /system/status from apps */}
-                        <div className="flex items-center justify-between text-sm">
-                            <span>Radarr</span>
-                            <span className={settings?.radarr?.url ? 'text-green-400 flex items-center gap-1' : 'text-gray-600'}>
-                                {settings?.radarr?.url ? <><CheckCircle size={14} /> Connected</> : 'Not Configured'}
-                            </span>
+                <Card>
+                    <CardContent style={{ padding: '24px' }}>
+                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <AlertTriangle size={20} className="text-yellow-500" /> System Health
+                        </h2>
+                        <div className="space-y-4">
+                            {/* Mock Health Checks for now - real implementation would fetch /system/status from apps */}
+                            <div className="flex items-center justify-between text-sm">
+                                <span>Radarr</span>
+                                <span className={settings?.radarr?.url ? 'text-green-400 flex items-center gap-1' : 'text-gray-600'}>
+                                    {settings?.radarr?.url ? <><CheckCircle size={14} /> Connected</> : 'Not Configured'}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span>Sonarr</span>
+                                <span className={settings?.sonarr?.url ? 'text-green-400 flex items-center gap-1' : 'text-gray-600'}>
+                                    {settings?.sonarr?.url ? <><CheckCircle size={14} /> Connected</> : 'Not Configured'}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span>SABnzbd</span>
+                                <span className={settings?.sabnzbd?.url ? 'text-green-400 flex items-center gap-1' : 'text-gray-600'}>
+                                    {settings?.sabnzbd?.url ? <><CheckCircle size={14} /> Connected</> : 'Not Configured'}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex items-center justify-between text-sm">
-                            <span>Sonarr</span>
-                            <span className={settings?.sonarr?.url ? 'text-green-400 flex items-center gap-1' : 'text-gray-600'}>
-                                {settings?.sonarr?.url ? <><CheckCircle size={14} /> Connected</> : 'Not Configured'}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                            <span>SABnzbd</span>
-                            <span className={settings?.sabnzbd?.url ? 'text-green-400 flex items-center gap-1' : 'text-gray-600'}>
-                                {settings?.sabnzbd?.url ? <><CheckCircle size={14} /> Connected</> : 'Not Configured'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
-                <div className="glass-card p-6">
-                    <h2 className="text-xl font-bold mb-4">Quick Limits</h2>
-                    <div className="text-sm text-gray-400 mb-4">
-                        Adjust download speeds (Not implemented in demo)
-                    </div>
-                    <div className="flex gap-2">
-                        <button className="btn-ghost text-xs border border-white/10">Result 50%</button>
-                        <button className="btn-ghost text-xs border border-white/10">Pause</button>
-                        <button className="btn-ghost text-xs border border-white/10">Resume</button>
-                    </div>
-                </div>
+                <Card>
+                    <CardContent style={{ padding: '24px' }}>
+                        <h2 className="text-xl font-bold mb-4">Quick Limits</h2>
+                        <div className="text-sm text-gray-400 mb-4">
+                            Adjust download speeds (Not implemented in demo)
+                        </div>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm">Limit 50%</Button>
+                            <Button variant="outline" size="sm">Pause</Button>
+                            <Button variant="outline" size="sm">Resume</Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

@@ -6,7 +6,10 @@ import { posterCache } from '../services/posterCache'
 import MediaCard from '../components/Cards/MediaCard'
 import MediaDetailsModal from '../components/Modals/MediaDetailsModal'
 import { Tabs, MediaCardSkeleton } from '../components/Common'
-import { Film, Tv, RefreshCw, AlertCircle, Search } from 'lucide-react'
+import { SearchInput } from '../components/ui/Input'
+import Button from '../components/ui/Button'
+import { Dropdown, DropdownItem } from '../components/ui/Dropdown'
+import { Film, Tv, RefreshCw, AlertCircle, Check, ArrowUpDown } from 'lucide-react'
 import styles from './Library.module.css'
 
 const isDev = import.meta.env.DEV
@@ -109,34 +112,39 @@ const Library = () => {
 
                 <div className={styles.headerRight}>
                     <div className={styles.searchBox}>
-                        <Search size={16} className={styles.searchIcon} />
-                        <input
-                            type="text"
+                        <SearchInput
                             placeholder="Search library..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={styles.searchInput}
                         />
                     </div>
-                    <div className={styles.sortBox}>
-                        <span className={styles.sortLabel}>Sort</span>
-                        <select
-                            className={styles.sortSelect}
-                            value={sortMode}
-                            onChange={(e) => setSortMode(e.target.value)}
-                        >
-                            <option value="title">Title (A-Z)</option>
-                            <option value="year">Year (Newest)</option>
-                            <option value="size">Size (Largest)</option>
-                        </select>
-                    </div>
-                    <button
-                        className={styles.refreshBtn}
+                    <Dropdown
+                        trigger={
+                            <Button variant="ghost" size="sm" leftIcon={<ArrowUpDown size={16} />}>
+                                Sort: {sortMode === 'title' ? 'Title' : sortMode === 'year' ? 'Year' : 'Size'}
+                            </Button>
+                        }
+                    >
+                        <DropdownItem onClick={() => setSortMode('title')} icon={sortMode === 'title' ? <Check size={14} /> : null}>
+                            Title (A-Z)
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setSortMode('year')} icon={sortMode === 'year' ? <Check size={14} /> : null}>
+                            Year (Newest)
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setSortMode('size')} icon={sortMode === 'size' ? <Check size={14} /> : null}>
+                            Size (Largest)
+                        </DropdownItem>
+                    </Dropdown>
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => currentQuery.refetch()}
                         disabled={currentQuery.isFetching}
+                        className={styles.refreshBtn}
                     >
-                        <RefreshCw size={16} className={currentQuery.isFetching ? styles.spin : ''} />
-                    </button>
+                        <RefreshCw size={18} className={currentQuery.isFetching ? styles.spin : ''} />
+                    </Button>
                 </div>
             </header>
 

@@ -102,59 +102,60 @@
     position: relative;
 }
 
-.inputIcon {
+/* Input Wrapper support */
+.inputIconWrapper {
     position: absolute;
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-muted);
+    z-index: 2;
     pointer-events: none;
-    z-index: 1;
-}
-
-.input {
-    width: 100%;
-    padding: 14px 14px 14px 44px;
-    font-size: var(--text-base);
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-.input::placeholder {
+    display: flex;
+    align-items: center;
     color: var(--text-muted);
 }
 
-.input:hover {
-    border-color: var(--border-default);
-    background: rgba(255, 255, 255, 0.06);
+.inputWithIcon {
+    padding-left: 44px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-primary) !important;
 }
 
-.input:focus {
-    border-color: var(--primary-default);
-    background: rgba(13, 148, 136, 0.05);
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+.inputWithIcon:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: var(--border-default) !important;
 }
 
-/* Password toggle button */
-.eyeBtn {
+.inputWithIcon:focus {
+    border-color: var(--primary-default) !important;
+    background: rgba(13, 148, 136, 0.05) !important;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
+}
+
+/* Password Toggle */
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.passwordWrapper .eyeBtn {
     position: absolute;
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    z-index: 2;
+    background: transparent;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
     padding: 4px;
-    border-radius: var(--radius-sm);
-    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.eyeBtn:hover {
+.passwordWrapper .eyeBtn:hover {
     color: var(--text-primary);
 }
 
@@ -190,38 +191,18 @@
     accent-color: var(--primary-default);
 }
 
-/* Submit Button */
+/* Submit Button Override */
 .submitBtn {
     width: 100%;
-    padding: 14px;
     margin-top: var(--space-2);
-    font-size: var(--text-base);
-    font-weight: 600;
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary-default), var(--primary-hover, #0f766e));
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    transition: all 0.2s ease;
+    background: linear-gradient(135deg, var(--primary-default), var(--primary-hover, #0f766e)) !important;
+    border: none !important;
     box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
 }
 
 .submitBtn:hover:not(:disabled) {
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
-}
-
-.submitBtn:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-.submitBtn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
 }
 
 /* Footer */

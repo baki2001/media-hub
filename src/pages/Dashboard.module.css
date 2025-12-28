@@ -4,11 +4,11 @@
     gap: 24px;
 }
 
-.statCard {
-    padding: 24px;
+.statCardContent {
     display: flex;
     align-items: center;
     gap: 20px;
+    padding: 24px;
 }
 
 .iconArea {

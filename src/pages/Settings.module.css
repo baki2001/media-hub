@@ -46,6 +46,7 @@
     font-weight: 500;
     text-align: left;
     width: 100%;
+    justify-content: flex-start;
 }
 
 .navItem:hover {
@@ -97,16 +98,14 @@
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-4);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
+    /* Background handled by Card component, but we keep flex layout */
     transition: all var(--transition-base);
 }
 
-.serviceCard:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.12);
-}
+/* Override default Card styles if needed, or rely on Card's defaults.
+   Card default has background/border.
+   serviceCard had: background: rgba(255, 255, 255, 0.02);
+   We can let Card handle it or override here. */
 
 .serviceIcon {
     width: 48px;
@@ -147,38 +146,6 @@
     gap: var(--space-2);
 }
 
-.restartBtn {
-    background: transparent;
-    border: none;
-    color: var(--danger);
-    padding: var(--space-2);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    display: flex;
-}
-
-.restartBtn:hover {
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.configureBtn {
-    padding: var(--space-2) var(--space-4);
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.configureBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--accent);
-}
-
 /* Form */
 .formContainer {
     max-width: 400px;
@@ -186,19 +153,7 @@
 }
 
 .backBtn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
     margin-bottom: var(--space-4);
-}
-
-.backBtn:hover {
-    text-decoration: underline;
 }
 
 .formTitle {
@@ -219,95 +174,10 @@
     margin-bottom: var(--space-2);
 }
 
-.input {
-    width: 100%;
-    padding: var(--space-3);
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    outline: none;
-    transition: border-color var(--transition-base);
-}
-
-.input:focus {
-    border-color: var(--accent);
-}
-
 .formActions {
     display: flex;
     gap: var(--space-3);
     margin-top: var(--space-6);
-}
-
-.saveBtn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: var(--accent);
-    color: black;
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.saveBtn:hover {
-    background: var(--accent-hover);
-}
-
-.testBtn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    min-width: 130px;
-    justify-content: center;
-}
-
-.testBtn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--accent);
-}
-
-.testBtn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.cancelBtn {
-    padding: var(--space-2) var(--space-4);
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-}
-
-.cancelBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Toggle List */
@@ -318,50 +188,6 @@
     max-width: 400px;
 }
 
-.toggleRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-4);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-}
-
-.toggleLabel {
-    font-weight: 500;
-}
-
-.toggle {
-    width: 44px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    position: relative;
-    transition: all var(--transition-base);
-}
-
-.toggleOn {
-    background: var(--accent);
-}
-
-.toggleKnob {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border-radius: 50%;
-    transition: transform var(--transition-base);
-}
-
-.toggleOn .toggleKnob {
-    transform: translateX(20px);
-}
-
 /* Section */
 .section {
     margin-bottom: var(--space-8);
@@ -370,96 +196,9 @@
 .sectionTitle {
     font-weight: 600;
     margin-bottom: var(--space-4);
-}
-
-/* Theme Grid */
-.themeGrid {
-    display: flex;
-    gap: var(--space-4);
-}
-
-.themeBtn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.themeBtn:hover {
-    transform: scale(1.1);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Color Picker */
-.colorSwatches {
-    display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-    margin-bottom: var(--space-6);
-}
-
-.colorSwatch {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.colorSwatch:hover {
-    transform: scale(1.1);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.customColorRow {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.colorPickerWrapper {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-}
-
-.colorPicker {
-    width: 48px;
-    height: 48px;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    padding: 0;
-    background: none;
-}
-
-.colorPicker::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-
-.colorPicker::-webkit-color-swatch {
-    border: 2px solid var(--glass-border);
-    border-radius: var(--radius-md);
-}
-
-.hexInput {
-    width: 100px;
-    padding: var(--space-2) var(--space-3);
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-family: monospace;
-    font-size: var(--font-size-sm);
-    text-transform: uppercase;
-}
-
-.hexInput:focus {
-    outline: none;
-    border-color: var(--accent);
+    gap: var(--space-2);
 }
 
 .sectionDesc {
@@ -468,7 +207,7 @@
     margin-bottom: var(--space-4);
 }
 
-/* Account Card */
+/* Account Card - Removed unused styles if redundant, but keeping for reference if missed */
 .accountCard {
     display: flex;
     justify-content: space-between;

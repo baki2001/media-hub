@@ -98,7 +98,7 @@
 .navItem:hover {
     background: rgba(125, 125, 125, 0.1);
     color: var(--text-primary);
-    transform: translateX(4px);
+    /* Removed transform to prevent clipping */
 }
 
 .active {
@@ -143,6 +143,12 @@
     transition: all var(--transition-base);
     font-size: var(--font-size-sm);
     font-weight: 500;
+    outline: none;
+}
+
+.notifyButton:focus-visible {
+    box-shadow: 0 0 0 2px var(--accent);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .notifyButton:hover {

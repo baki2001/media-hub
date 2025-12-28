@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSettings } from '../context/SettingsContext'
 import { SabnzbdService } from '../services/sabnzbd'
 import { Play, Pause, Trash2, DownloadCloud, Clock, CheckCircle, XCircle, List } from 'lucide-react'
+import Button from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
 import styles from './Downloads.module.css'
 
 const TABS = [
@@ -47,19 +49,21 @@ const Downloads = () => {
         onSuccess: () => queryClient.invalidateQueries(['sabnzbd', 'queue'])
     })
 
-    const queue = queueQuery.data?.queue || { slots: [], speed: '0 Mb/s', timeleft: '0:00:00', mbleft: '0', paused: false }
+    const queue = queueQuery.data?.queue || { slots: [], speed: '0', timeleft: '0:00:00', mbleft: '0', paused: false }
     const history = historyQuery.data?.history?.slots || []
     const isPaused = queue.paused
 
     if (!settings?.sabnzbd?.url) {
         return (
             <div className={styles.layout}>
-                <div className={styles.notConfigured}>
+                <Card className={styles.notConfigured}>
                     <DownloadCloud size={48} />
                     <h2>SABnzbd Not Configured</h2>
                     <p>Add your SABnzbd connection in Settings.</p>
-                    <a href="/settings" className={styles.configBtn}>Configure</a>
-                </div>
+                    <Button variant="primary" onClick={() => window.location.href = '/settings'}>
+                        Configure
+                    </Button>
+                </Card>
             </div>
         )
     }
@@ -74,12 +78,15 @@ const Downloads = () => {
 
                 {/* Speed Stats */}
                 <div className={styles.speedStats}>
-                    <span className={styles.speedValue}>{queue.speed.replace('M', 'Mb')}</span>
+                    <span className={styles.speedValue}>
+                        {!queue.speed || queue.speed === '0' ? '0 Mb/s' : queue.speed.replace('M', 'Mb')}
+                    </span>
                     <span className={styles.speedLabel}>Download Speed</span>
 
                     <div className={styles.statRow}>
                         <div className={styles.statItem}>
                             <span className={styles.statNumber}>{queue.slots?.length || 0}</span>
+                            <span> </span>
                             <span className={styles.statLabel}>Queued</span>
                         </div>
                         <div className={styles.statItem}>
@@ -94,15 +101,16 @@ const Downloads = () => {
                         const Icon = tab.icon
                         const count = tab.id === 'queue' ? queue.slots?.length : history.length
                         return (
-                            <button
+                            <Button
                                 key={tab.id}
+                                variant="ghost"
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`${styles.navItem} ${activeTab === tab.id ? styles.active : ''}`}
+                                leftIcon={<Icon size={18} />}
                             >
-                                <Icon size={18} />
-                                <span>{tab.label}</span>
+                                {tab.label}
                                 {count > 0 && <span className={styles.badge}>{count}</span>}
-                            </button>
+                            </Button>
                         )
                     })}
                 </nav>
@@ -110,19 +118,23 @@ const Downloads = () => {
                 {/* Global Controls */}
                 <div className={styles.sidebarActions}>
                     {isPaused ? (
-                        <button
-                            className={`${styles.globalBtn} ${styles.resumeBtn}`}
+                        <Button
+                            variant="primary" // Changed from globalBtn/resumeBtn to primary
+                            className={styles.globalBtn}
                             onClick={() => resumeMutation.mutate()}
+                            leftIcon={<Play size={18} fill="currentColor" />}
                         >
-                            <Play size={18} fill="currentColor" /> Resume All
-                        </button>
+                            Resume All
+                        </Button>
                     ) : (
-                        <button
-                            className={`${styles.globalBtn} ${styles.pauseBtn}`}
+                        <Button
+                            variant="warning" // Assuming warning variant exists or use danger/primary
+                            className={styles.globalBtn}
                             onClick={() => pauseMutation.mutate()}
+                            leftIcon={<Pause size={18} fill="currentColor" />}
                         >
-                            <Pause size={18} fill="currentColor" /> Pause All
-                        </button>
+                            Pause All
+                        </Button>
                     )}
                 </div>
             </aside>
@@ -165,26 +177,29 @@ const Downloads = () => {
 
                                 <div className={styles.itemControls}>
                                     {slot.status === 'Paused' ? (
-                                        <button
-                                            className={`${styles.itemBtn} ${styles.resume}`}
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={styles.itemBtn}
                                             onClick={() => itemActionMutation.mutate({ action: 'resume', id: slot.nzo_id })}
-                                        >
-                                            <Play size={16} />
-                                        </button>
+                                            leftIcon={<Play size={16} />}
+                                        />
                                     ) : (
-                                        <button
-                                            className={`${styles.itemBtn} ${styles.pause}`}
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={styles.itemBtn}
                                             onClick={() => itemActionMutation.mutate({ action: 'pause', id: slot.nzo_id })}
-                                        >
-                                            <Pause size={16} />
-                                        </button>
+                                            leftIcon={<Pause size={16} />}
+                                        />
                                     )}
-                                    <button
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
                                         className={`${styles.itemBtn} ${styles.delete}`}
                                         onClick={() => itemActionMutation.mutate({ action: 'delete', id: slot.nzo_id })}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                        leftIcon={<Trash2 size={16} />}
+                                    />
                                 </div>
                             </div>
                         ))}

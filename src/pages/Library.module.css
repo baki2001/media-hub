@@ -22,138 +22,34 @@
     font-weight: 700;
 }
 
-.tabs {
-    display: inline-flex;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 4px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
-}
-
-.tab {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--text-secondary);
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-base);
-}
-
-.tab:hover {
-    color: var(--text-primary);
-}
-
-.activeTab {
-    background: rgba(13, 148, 136, 0.15);
-    color: var(--accent);
-}
-
-.tabCount {
-    font-size: var(--font-size-xs);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2px 6px;
-    border-radius: var(--radius-full);
-    margin-left: 4px;
-}
-
-.headerRight {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+.tabs,
+.tab,
+.activeTab,
+.tabCount,
+.tabCount,
+.searchIcon,
+.refreshBtn,
+.refreshBtn:hover {
+    /* Removed unused styles as they are now handled by reusable components */
+    display: none;
 }
 
 .searchBox {
     position: relative;
     display: flex;
     align-items: center;
+    width: 240px;
 }
 
-.searchIcon {
-    position: absolute;
-    left: var(--space-3);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
+/* Optional: Override/adjust SearchInput width if needed via a wrapper class */
 .searchInput {
-    width: 200px;
-    padding: var(--space-2) var(--space-3) var(--space-2) 36px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
+    /* We can style the wrapper passed to SearchInput if needed here */
+    display: block;
+    /* Restore display for the passed class if used */
+    width: 100%;
 }
 
-.searchInput:focus {
-    outline: none;
-    border-color: var(--accent);
-    width: 280px;
-}
-
-.searchInput::placeholder {
-    color: var(--text-muted);
-}
-
-.searchResults {
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-    margin-bottom: var(--space-4);
-}
-
-.sortBox {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-2) var(--space-3);
-}
-
-.sortLabel {
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-}
-
-.sortSelect {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    outline: none;
-}
-
-.sortSelect option {
-    background: #1a1a1a;
-}
-
-.refreshBtn {
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: var(--space-2);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    display: flex;
-}
-
-.refreshBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-}
+/* Sort Box styles removed - replaced by Dropdown */
 
 .spin {
     animation: spin 1s linear infinite;
